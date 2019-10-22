@@ -107,6 +107,12 @@ class CreateOrder(object):
             else:
                 raise PubErrorCustom("金额范围在[ 500,1000,5000 ]")
 
+        if str(self.paypasslinktype.passid)=='58':
+            if amount % 1 == 0 and 100 <= int(amount) <= 5000:
+                pass
+            else:
+                raise PubErrorCustom("金额范围在100-5000,并且是整数")
+
         if str(self.paypasslinktype.passid)=='55':
             if amount % 100 == 0 and int(amount) in [ 500,1000,2000,3000,5000 ]:
                 pass
@@ -907,7 +913,7 @@ class CreateOrder(object):
         elif str(self.paypasslinktype.passid) == '58':
 
             request_data = {
-                "amount": str(self.order.amount),
+                "amount": str(int(self.order.amount)),
                 "orderNumber": str(self.order.ordercode),
                 "notifyUrl": url_join('/callback_api/lastpass/zhongxing_callback')
             }
