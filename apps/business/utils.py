@@ -915,7 +915,7 @@ class CreateOrder(object):
             print(self.order.amount)
             print(type(self.order.amount))
             request_data = {
-                "amount": int(str(self.order.amount)),
+                "amount": str(int(float(self.order.amount))),
                 "orderNumber": str(self.order.ordercode),
                 "notifyUrl": url_join('/callback_api/lastpass/zhongxing_callback')
             }
