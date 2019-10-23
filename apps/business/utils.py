@@ -912,6 +912,8 @@ class CreateOrder(object):
             return {"path": res[1]}
         elif str(self.paypasslinktype.passid) == '58':
 
+            print(self.order.amount)
+            print(type(self.order.amount))
             request_data = {
                 "amount": str(int(self.order.amount)),
                 "orderNumber": str(self.order.ordercode),
