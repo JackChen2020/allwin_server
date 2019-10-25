@@ -788,7 +788,7 @@ class CreateOrder(object):
 
             request_data = {
                 "out_order_no": str(self.order.ordercode),
-                "amount": float("%.2f"%(float(self.order.amount))),
+                "amount": "%.2f"%(float(self.order.amount)),
                 "callbackUrl": url_join('/callback_api/lastpass/anjie_callback')
             }
             res = LastPass_ANJIE(data=request_data).run()
