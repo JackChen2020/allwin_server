@@ -13,7 +13,7 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
                 LastPass_JLFZFB,LastPass_WXHFYS,LastPass_ZFBHFYS,LastPass_SDGY,LastPass_JIABAO,LastPass_QIANWANG,LastPass_CHUANGYUAN_YUANSHENG,\
                     LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,LastPass_XINGHE,LastPass_YUANLAI,\
                         LastPass_JINGSHA,LastPass_ANJIE,LastPass_hahapay,LastPass_SHUIJING,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_BAWANGKUAIJIE,\
-                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING
+                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG
 
 class CreateOrder(object):
 
@@ -943,6 +943,19 @@ class CreateOrder(object):
 
             with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
                 f1.write(res[1])
+            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+        elif str(self.paypasslinktype.passid) == '60':
+
+            print(self.order.amount)
+            request_data = {
+                "money": float(self.order.amount),
+                "customno": str(self.order.ordercode),
+                "notifyurl": url_join('/api/lastpass/tiancheng_callback')
+            }
+            res = LastPass_TIANCHENG(data=request_data).run()
+
+            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
+                f1.write(res)
             return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
 
 

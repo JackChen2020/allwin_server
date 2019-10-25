@@ -4519,6 +4519,81 @@ class LastPass_ZHAOXING(LastPassBase):
 
             PayCallLastPass().run(order=order)
 
+
+class LastPass_TIANCHENG(LastPassBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+
+        #生产环境
+        self.create_order_url="https://www.ccnkyy.com/api/v3/cashier.php"
+        self.secret = "c650442bfd6a36749a0c57c4802c5cbd"
+
+        self.businessId = "TC19102517295"
+
+        self.response = None
+
+    def _request(self):
+        result = request(method='POST', url=self.create_order_url, data=self.data, verify=True)
+        self.response = result.text
+
+    def run(self):
+        self.data.setdefault('merchant',self.businessId)
+        self.data.setdefault('qrtype',"aph5")
+        self.data.setdefault('sendtime', UtilTime().timestamp)
+        self.data.setdefault("risklevel",1)
+        self.data.setdefault("backurl",url_join("/pay/#/juli"))
+
+
+        encrypted = ("merchant={}&qrtype={}&customno={}&money={}&sendtime={}&notifyurl={}&backurl={}&risklevel={}{}".format(
+            self.data['merchant'],
+            self.data['qrtype'],
+            self.data['customno'],
+            self.data['money'],
+            self.data['sendtime'],
+            self.data['notifyurl'],
+            self.data['backurl'],
+            self.data['risklevel'],
+            self.secret)).encode("utf-8")
+
+        print(encrypted)
+        self.data['sign'] = hashlib.md5(encrypted).hexdigest()
+
+        print(self.data)
+        self._request()
+        return self.response
+
+    def call_run(self):
+
+        print(self.data)
+        encrypted = ("merchant={}&qrtype={}&customno={}&sendtime={}&orderno={}&money={}&paytime={}&state={}{}".format(
+            self.data['merchant'],
+            self.data['qrtype'],
+            self.data['customno'],
+            self.data['sendtime'],
+            self.data['orderno'],
+            self.data['money'],
+            self.data['paytime'],
+            self.data['state'],
+            self.secret)).encode("utf-8")
+
+        sign = hashlib.md5(encrypted).hexdigest()
+
+        if sign != self.data['sign']:
+            raise PubErrorCustom("验签失败!")
+
+
+        if str(self.data.get("state")) == '1':
+            try:
+                order = Order.objects.select_for_update().get(ordercode=self.data.get("customno"))
+            except Order.DoesNotExist:
+                raise PubErrorCustom("订单号不正确!")
+
+            if order.status == '0':
+                raise PubErrorCustom("订单已处理!")
+
+            PayCallLastPass().run(order=order)
+
 if __name__=="__main__":
 
     request_data = {
