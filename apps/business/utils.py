@@ -113,6 +113,12 @@ class CreateOrder(object):
             else:
                 raise PubErrorCustom("金额范围在100-5000,并且是整数")
 
+        if str(self.paypasslinktype.passid)=='59':
+            if amount % 1 == 0 and 50 <= int(amount) <= 5000:
+                pass
+            else:
+                raise PubErrorCustom("金额范围在50-5000,并且是整数")
+
         if str(self.paypasslinktype.passid)=='55':
             if amount % 100 == 0 and int(amount) in [ 500,1000,2000,3000,5000 ]:
                 pass
@@ -927,7 +933,7 @@ class CreateOrder(object):
 
             print(self.order.amount)
             request_data = {
-                "money": str(float(self.order.amount)),
+                "money": str(int(float(self.order.amount))),
                 "innerorderid": str(self.order.ordercode),
                 "notifyurl": url_join('/api/lastpass/zhaoxing_callback')
             }
