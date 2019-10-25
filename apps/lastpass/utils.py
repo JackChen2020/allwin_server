@@ -2795,11 +2795,11 @@ class LastPass_SBGM(LastPassBase):
 
 
         #生产环境
-        self.create_order_url="https://anjieapi.teebsdauhuhuu.work/v2/precreate_v2.ashx"
+        self.create_order_url="https:/zapi.safepay.center/v2/precreate_v2.ashx"
 
         # self.create_order_url="http://requestbin.net/r/1crsgiq1"
-        self.secret = "7BK28RqaYSvJbQdzNUDkGPEe5cCs6rF3"
-        self.businessId = "9776636497467998"
+        self.secret = "hmPdOi9fmWj60rwik4Uw7nzktyFxIuyQ"
+        self.businessId = "2517248140438084"
 
         self.response = None
 
