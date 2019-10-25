@@ -3148,7 +3148,7 @@ class LastPass_ANJIE(LastPassBase):
         super().__init__(**kwargs)
 
         # 生产环境
-        self.create_order_url = "https:/zapi.safepay.center/v2/precreate_v2.ashx"
+        self.create_order_url = "http:/zapi.safepay.center/v2/precreate_v2.ashx"
 
         # self.create_order_url="http://requestbin.net/r/1crsgiq1"
         self.secret = "hmPdOi9fmWj60rwik4Uw7nzktyFxIuyQ"
