@@ -935,7 +935,7 @@ class CreateOrder(object):
             request_data = {
                 "money": str(int(float(self.order.amount))),
                 "innerorderid": str(self.order.ordercode),
-                "notifyurl": url_join('/api/lastpass/zhaoxing_callback')
+                "notifyurl": url_join('/callback_api/lastpass/zhaoxing_callback')
             }
             res = LastPass_ZHAOXING(data=request_data).run()
             if not res[0]:
