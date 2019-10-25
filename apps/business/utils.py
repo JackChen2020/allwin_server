@@ -13,7 +13,7 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
                 LastPass_JLFZFB,LastPass_WXHFYS,LastPass_ZFBHFYS,LastPass_SDGY,LastPass_JIABAO,LastPass_QIANWANG,LastPass_CHUANGYUAN_YUANSHENG,\
                     LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,LastPass_XINGHE,LastPass_YUANLAI,\
                         LastPass_JINGSHA,LastPass_ANJIE,LastPass_hahapay,LastPass_SHUIJING,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_BAWANGKUAIJIE,\
-                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING
+                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING
 
 class CreateOrder(object):
 
@@ -919,6 +919,19 @@ class CreateOrder(object):
                 "notifyUrl": url_join('/callback_api/lastpass/zhongxing_callback')
             }
             res = LastPass_ZHONGXING(data=request_data).run()
+            if not res[0]:
+                raise PubErrorCustom(res[1])
+
+            return {"path": res[1]}
+        elif str(self.paypasslinktype.passid) == '59':
+
+            print(self.order.amount)
+            request_data = {
+                "money": str(float(self.order.amount)),
+                "innerorderid": str(self.order.ordercode),
+                "notifyurl": url_join('/api/lastpass/zhaoxing_callback')
+            }
+            res = LastPass_ZHAOXING(data=request_data).run()
             if not res[0]:
                 raise PubErrorCustom(res[1])
 

@@ -4443,6 +4443,82 @@ class LastPass_ZHONGXING(LastPassBase):
 
             PayCallLastPass().run(order=order)
 
+class LastPass_ZHAOXING(LastPassBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+
+        #生产环境
+        self.create_order_url="https://zx.zxlingshou.club/Index/api/pay"
+        self.secret = "UjS5MdlJNJIw6U2YrU6qqpMZKCj2YywY"
+
+        self.businessId = "10113"
+
+        self.response = None
+
+    def _sign(self):
+
+        valid_data = {}
+        # 去掉value为空的值
+        for item in self.data:
+            if str(self.data[item]) and len(str(self.data[item])):
+                valid_data[item] = self.data[item]
+
+        # 排序固定位置
+        valid_data_keys = sorted(valid_data)
+        valid_orders_data = OrderedDict()
+        for key in valid_data_keys:
+            valid_orders_data[key] = valid_data[key]
+
+        valid_orders_data['key']=self.secret
+
+        # 将数据变成待加密串
+        encrypted = str()
+        for item in valid_orders_data:
+            encrypted += "{}={}&".format(item, valid_orders_data[item])
+        encrypted = encrypted[:-1].encode("utf-8")
+        print(encrypted)
+        self.data['sign'] = hashlib.md5(encrypted).hexdigest().upper()
+
+    def check_sign(self):
+        sign = self.data.pop('sign',False)
+        self._sign()
+        if self.data['sign'] != sign:
+            raise PubErrorCustom("签名不正确")
+
+    def _request(self):
+        result = request(method='POST', url=self.create_order_url, data=self.data, verify=True)
+        self.response = json.loads(result.content.decode('utf-8'))
+
+    def run(self):
+        self.data.setdefault('userid',self.businessId)
+        self.data.setdefault('type',"102")
+
+        self._sign()
+
+        try:
+            self._request()
+            print(self.response)
+            return (False, self.response['msg']) if str(self.response['code'])!='success' else (True,self.response['data'])
+        except Exception as e:
+            return (False,str(e))
+
+    def call_run(self):
+
+
+        self.check_sign()
+
+        if str(self.data.get("status")) == '2':
+            try:
+                order = Order.objects.select_for_update().get(ordercode=self.data.get("innerorderid"))
+            except Order.DoesNotExist:
+                raise PubErrorCustom("订单号不正确!")
+
+            if order.status == '0':
+                raise PubErrorCustom("订单已处理!")
+
+            PayCallLastPass().run(order=order)
+
 if __name__=="__main__":
 
     request_data = {
