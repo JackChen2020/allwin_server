@@ -954,9 +954,7 @@ class CreateOrder(object):
             }
             res = LastPass_TIANCHENG(data=request_data).run()
 
-            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
-                f1.write(res)
-            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+            return {"res": res, "userid": self.order.userid, "ordercode": self.order.ordercode, "htmlfile": "pay11.html"}
 
 
     def run(self):

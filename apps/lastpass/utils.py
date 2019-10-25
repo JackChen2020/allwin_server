@@ -4559,9 +4559,8 @@ class LastPass_TIANCHENG(LastPassBase):
         print(encrypted)
         self.data['sign'] = hashlib.md5(encrypted).hexdigest()
 
-        print(self.data)
-        self._request()
-        return self.response
+        self.data.setdefault("create_order_url",self.create_order_url)
+        return self.data
 
     def call_run(self):
 
