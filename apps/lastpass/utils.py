@@ -3158,9 +3158,7 @@ class LastPass_ANJIE(LastPassBase):
 
     def _request(self):
 
-        result = request(method='POST', url=self.create_order_url, json=self.data, headers={
-            "Content-Type": 'application/json'
-        })
+        result = request(method='POST', url=self.create_order_url, data=self.data)
         self.response = json.loads(result.content.decode('utf-8'))
 
     def run(self):
