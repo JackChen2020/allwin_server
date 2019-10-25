@@ -3144,26 +3144,27 @@ class LastPass_JINGSHA(LastPassBase):
 
 
 class LastPass_ANJIE(LastPassBase):
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-
-        #生产环境
-        self.create_order_url="https://anjieapi.teebsdauhuhuu.work/v2/precreate_v2.ashx"
+        # 生产环境
+        self.create_order_url = "https:/zapi.safepay.center/v2/precreate_v2.ashx"
 
         # self.create_order_url="http://requestbin.net/r/1crsgiq1"
-        self.secret = "zKU7ppP5uqYC7HF3c2vP9yRJ6TfL8Ilg"
-        self.businessId = "8085004732525943"
+        self.secret = "hmPdOi9fmWj60rwik4Uw7nzktyFxIuyQ"
+        self.businessId = "2517248140438084"
 
         self.response = None
 
     def _request(self):
 
-        result = request(method='POST', url=self.create_order_url, data=self.data)
+        result = request(method='POST', url=self.create_order_url, json=self.data, headers={
+            "Content-Type": 'application/json'
+        })
         self.response = json.loads(result.content.decode('utf-8'))
 
     def run(self):
-        self.data.setdefault('appid',self.businessId)
+        self.data.setdefault('appid', self.businessId)
 
         encrypted = "{}{}{}".format(
             self.data.get("appid"),
@@ -3178,9 +3179,9 @@ class LastPass_ANJIE(LastPassBase):
             print(self.data)
             self._request()
             print(self.response)
-            return (False, self.response['Msg']) if str(self.response['code'])!='0' else (True,self.response['url'])
+            return (False, self.response['Msg']) if str(self.response['code']) != '0' else (True, self.response['url'])
         except Exception as e:
-            return (False,str(e))
+            return (False, str(e))
 
     def call_run(self):
 
@@ -3204,7 +3205,7 @@ class LastPass_ANJIE(LastPassBase):
         if order.status == '0':
             raise PubErrorCustom("订单已处理!")
 
-        if float(order.amount) != float(self.data.get("returnamount")):
+        if float(order.amount) != self.data.get("returnamount"):
             raise PubErrorCustom("金额不符,不予回调!")
         PayCallLastPass().run(order=order)
 

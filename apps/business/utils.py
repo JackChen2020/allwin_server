@@ -86,7 +86,7 @@ class CreateOrder(object):
                 raise PubErrorCustom("通道传入有误!")
 
         if str(self.paypasslinktype.passid) == '47':
-            if 500.0 <= float(amount) <= 10000.0:
+            if 300.0 <= float(amount) <= 10000.0:
                 pass
             else:
                 raise PubErrorCustom("金额范围在[500-10000]")
