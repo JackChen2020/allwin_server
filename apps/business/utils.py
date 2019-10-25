@@ -941,7 +941,9 @@ class CreateOrder(object):
             if not res[0]:
                 raise PubErrorCustom(res[1])
 
-            return {"path": res[1]}
+            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
+                f1.write(res[1])
+            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
 
 
     def run(self):
