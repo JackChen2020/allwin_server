@@ -131,6 +131,12 @@ class CreateOrder(object):
             else:
                 raise PubErrorCustom("金额范围是100-5000")
 
+        if str(self.paypasslinktype.passid)=='60':
+            if 300.0 <= amount <= 5000.0:
+                pass
+            else:
+                raise PubErrorCustom("金额范围是300-5000")
+
         if str(self.paypasslinktype.passid)=='56':
             if float(amount) in [ 40.0,50.0,60.0,70.0,80.0,90.0,100.0 ]:
                 pass
