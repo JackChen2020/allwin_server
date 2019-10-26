@@ -950,7 +950,7 @@ class CreateOrder(object):
             request_data = {
                 "money": float(self.order.amount),
                 "customno": str(self.order.ordercode),
-                "notifyurl": url_join('/api/lastpass/tiancheng_callback')
+                "notifyurl": url_join('/callback_api/lastpass/tiancheng_callback')
             }
             res = LastPass_TIANCHENG(data=request_data).run()
 
