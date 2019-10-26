@@ -166,8 +166,8 @@ class CreateOrder(object):
         if (amount < 100.0 or amount > 5000.0 or amount % 1.0 > 0) and str(self.paypasslinktype.passid)=='17':
             raise PubErrorCustom("金额范围[100,5000],并且金额是整元!")
 
-        if str(self.paypasslinktype.paytypeid)=='19' and amount not in [10,20,30,50,100,200,300,500]:
-            raise PubErrorCustom("金额固定为10,20,30,50,100,200,300,500")
+        # if str(self.paypasslinktype.paytypeid)=='19' and amount not in [10,20,30,50,100,200,300,500]:
+        #     raise PubErrorCustom("金额固定为10,20,30,50,100,200,300,500")
 
         if self.paypasslinktype.passid in (0, 1):
             try:
