@@ -974,6 +974,8 @@ class CreateOrder(object):
             if not res[0]:
                 raise PubErrorCustom(res[1])
 
+            return {"path": res[1]}
+
 
     def run(self):
         self.check_request_param()
