@@ -970,6 +970,7 @@ class CreateOrder(object):
                 "callback_url": url_join('/api/lastpass/ipayzhifubao_callback')
             }
             res = LastPass_IPAYZHIFUBAO(data=request_data).run()
+            print(res)
             if not res[0]:
                 raise PubErrorCustom(res[1])
 
