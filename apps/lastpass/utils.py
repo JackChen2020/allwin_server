@@ -3673,7 +3673,7 @@ class LastPass_BAWANGKUAIJIE(LastPassBase):
 
 
         #代付地址
-        self.daifu_url = "http://orderpay.xincheng-sh.com:8088/webwt/pay/gateway.do"
+        self.daifu_url = "http://df01.xincheng-sh.com:8088/webwt/pay/gateway.do"
 
         self.secret = "fcdd45eba6164b9cb2affed11b205d50"
 
@@ -4529,6 +4529,80 @@ class LastPass_TIANCHENG(LastPassBase):
         self.secret = "c650442bfd6a36749a0c57c4802c5cbd"
 
         self.businessId = "TC19102517295"
+
+        self.response = None
+
+    def _request(self):
+        result = request(method='POST', url=self.create_order_url, data=self.data, verify=True)
+        self.response = result.text
+
+    def run(self):
+        self.data.setdefault('merchant',self.businessId)
+        self.data.setdefault('qrtype',"aph5")
+        self.data.setdefault('sendtime', UtilTime().timestamp)
+        self.data.setdefault("risklevel",1)
+        self.data.setdefault("backurl",url_join("/pay/#/juli"))
+
+
+        encrypted = ("merchant={}&qrtype={}&customno={}&money={}&sendtime={}&notifyurl={}&backurl={}&risklevel={}{}".format(
+            self.data['merchant'],
+            self.data['qrtype'],
+            self.data['customno'],
+            self.data['money'],
+            self.data['sendtime'],
+            self.data['notifyurl'],
+            self.data['backurl'],
+            self.data['risklevel'],
+            self.secret)).encode("utf-8")
+
+        print(encrypted)
+        self.data['sign'] = hashlib.md5(encrypted).hexdigest()
+
+        self.data.setdefault("create_order_url",self.create_order_url)
+        return self.data
+
+    def call_run(self):
+
+        print(self.data)
+        encrypted = ("merchant={}&qrtype={}&customno={}&sendtime={}&orderno={}&money={}&paytime={}&state={}{}".format(
+            self.data['merchant'],
+            self.data['qrtype'],
+            self.data['customno'],
+            self.data['sendtime'],
+            self.data['orderno'],
+            self.data['money'],
+            self.data['paytime'],
+            self.data['state'],
+            self.secret)).encode("utf-8")
+
+        sign = hashlib.md5(encrypted).hexdigest()
+
+        if sign != self.data['sign']:
+            raise PubErrorCustom("验签失败!")
+
+
+        if str(self.data.get("state")) == '1':
+            try:
+                order = Order.objects.select_for_update().get(ordercode=self.data.get("customno"))
+            except Order.DoesNotExist:
+                raise PubErrorCustom("订单号不正确!")
+
+            if order.status == '0':
+                raise PubErrorCustom("订单已处理!")
+
+            PayCallLastPass().run(order=order)
+
+
+class LastPass_IPAYZHIFUBAO(LastPassBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+
+        #生产环境
+        self.create_order_url="	http://20pay.vip/api/Gateway/create"
+        self.secret = "742452DD4AB6D73449445FBF3F1D28E9"
+
+        self.businessId = "200010033"
 
         self.response = None
 
