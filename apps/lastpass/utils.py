@@ -4610,6 +4610,7 @@ class LastPass_IPAYZHIFUBAO(LastPassBase):
         print(self.data)
         result = request(method='POST', url=self.create_order_url, data=self.data, verify=True)
         print(result.text)
+        print(result.content.decode('utf-8'))
         self.response =  json.loads(result.content.decode('utf-8'))
 
     def run(self):
