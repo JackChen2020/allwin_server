@@ -4641,11 +4641,11 @@ class LastPass_IPAYZHIFUBAO(LastPassBase):
         print(self.data)
         encrypted = (str(self.data.get("amount")) + str(self.data.get("out_trade_no"))).encode("utf-8")
         print(encrypted)
-        sign = hashlib.md5(encrypted).hexdigest()
+        md5 = hashlib.md5(encrypted).hexdigest()
 
         encrypted = (self.secret.lower() + md5).encode('utf-8')
         print(encrypted)
-        self.data['sign'] = hashlib.md5(encrypted).hexdigest()
+        sign = hashlib.md5(encrypted).hexdigest()
 
         if sign != self.data['sign']:
             raise PubErrorCustom("验签失败!")
