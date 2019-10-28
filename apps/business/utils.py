@@ -13,7 +13,7 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
                 LastPass_JLFZFB,LastPass_WXHFYS,LastPass_ZFBHFYS,LastPass_SDGY,LastPass_JIABAO,LastPass_QIANWANG,LastPass_CHUANGYUAN_YUANSHENG,\
                     LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,LastPass_XINGHE,LastPass_YUANLAI,\
                         LastPass_JINGSHA,LastPass_ANJIE,LastPass_hahapay,LastPass_SHUIJING,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_BAWANGKUAIJIE,\
-                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG
+                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO
 
 class CreateOrder(object):
 
@@ -961,6 +961,17 @@ class CreateOrder(object):
             res = LastPass_TIANCHENG(data=request_data).run()
 
             return {"res": res, "userid": self.order.userid, "ordercode": self.order.ordercode, "htmlfile": "pay11.html"}
+        elif str(self.paypasslinktype.passid) == '61':
+
+            print(self.order.amount)
+            request_data = {
+                "amount": float(self.order.amount),
+                "out_trade_no": str(self.order.ordercode),
+                "callback_url": url_join('/api/lastpass/ipayzhifubao_callback')
+            }
+            res = LastPass_IPAYZHIFUBAO(data=request_data).run()
+            if not res[0]:
+                raise PubErrorCustom(res[1])
 
 
     def run(self):
