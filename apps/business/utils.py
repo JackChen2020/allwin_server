@@ -967,7 +967,7 @@ class CreateOrder(object):
             request_data = {
                 "amount":"%.2f"%float(self.order.amount),
                 "out_trade_no": str(self.order.ordercode),
-                "callback_url": url_join('/api/lastpass/ipayzhifubao_callback')
+                "callback_url": url_join('/callback_api/lastpass/ipayzhifubao_callback')
             }
             res = LastPass_IPAYZHIFUBAO(data=request_data).run()
             print(res)
