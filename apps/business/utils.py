@@ -981,7 +981,7 @@ class CreateOrder(object):
             request_data = {
                 "pay_orderid": str(self.order.ordercode),
                 "pay_amount": self.order.amount,
-                "pay_notifyurl": url_join('/api/lastpass/yslh_callback'),
+                "pay_notifyurl": url_join('/callback_api/lastpass/yslh_callback'),
                 "pay_bankcode": pay_bankcode
             }
             res = LastPass_YSLH(data=request_data).run()
