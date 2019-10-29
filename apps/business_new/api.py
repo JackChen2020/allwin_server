@@ -32,6 +32,11 @@ class BusinessNewAPIView(GenericViewSetCustom):
 
         return dfHandler(request.data,request.META.get("HTTP_X_REAL_IP")).Query()
 
+    @list_route(methods=['GET'])
+    @Core_connector_DAIFU()
+    def dfQueryTest(self,request):
+
+        return dfHandler(request.query_params,request.META.get("HTTP_X_REAL_IP"),isip=False).BalQueryTest()
 
     @list_route(methods=['POST'])
     @Core_connector_DAIFU()

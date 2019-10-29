@@ -38,10 +38,10 @@ class LastPassBase(object):
 class TestDf(object):
 
     def __init__(self):
-        self.secret = "4S4G7CBWJHYAD5ZE"
+        self.secret = "RNRQKS2NBAEFJRFL"
 
         self.data={
-            "businessid" : "5"
+            "businessid" : "109"
         }
 
     def _request(self,url):
@@ -87,6 +87,7 @@ class TestDf(object):
         md5params = md5params.encode("utf-8")
         self.data.setdefault("sign", hashlib.md5(md5params).hexdigest())
         return self._request("http://allwin6666.com/api_new/business/dfQuery")
+
 
     def df(self):
 

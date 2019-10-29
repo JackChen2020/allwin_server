@@ -23,7 +23,7 @@ from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApi
 class dfHandler(object):
 
 
-    def __init__(self,data,ip=None,islock=False):
+    def __init__(self,data,ip=None,islock=False,isip=True):
 
         print("ip:",ip)
 
@@ -49,28 +49,29 @@ class dfHandler(object):
                 raise PubErrorCustom("无效的商户!")
 
 
-        data =RedisCaCheHandler(
-            method="filter",
-            serialiers="WhiteListModelSerializerToRedis",
-            table="whitelist",
-            filter_value={
-                "userid" : self.user.userid
-            }
-        ).run()
+        if isip:
+            data =RedisCaCheHandler(
+                method="filter",
+                serialiers="WhiteListModelSerializerToRedis",
+                table="whitelist",
+                filter_value={
+                    "userid" : self.user.userid
+                }
+            ).run()
 
-        if not len(data):
-            raise PubErrorCustom("拒绝访问!")
+            if not len(data):
+                raise PubErrorCustom("拒绝访问!")
 
-        isIpValid = False
-        print(ip)
-        for item in data[0]['dfobj'].split(','):
-            print(item)
-            if str(item)==str(ip):
-                isIpValid = True
-                break
+            isIpValid = False
+            print(ip)
+            for item in data[0]['dfobj'].split(','):
+                print(item)
+                if str(item)==str(ip):
+                    isIpValid = True
+                    break
 
-        if not isIpValid:
-            raise PubErrorCustom("拒绝访问!")
+            if not isIpValid:
+                raise PubErrorCustom("拒绝访问!")
 
     def get_ok_bal(self):
         weeknum = UtilTime().get_week_day()
@@ -104,6 +105,20 @@ class dfHandler(object):
         logger.info("代付查询签名:{}-----{}".format(sign, self.data.get("sign")))
         if sign != self.data.get("sign"):
             raise PubErrorCustom("验签失败!")
+
+        # user = AccountBase(userid=self.user.userid,amount=1).query()
+
+        ok_bal = self.get_ok_bal()
+
+        return {"data":{
+            "bal" : round(float(self.user.bal),2),
+            "stop_bal" : round(float(self.user.stop_bal),2),
+            "ok_bal" : round(ok_bal,2)
+        }}
+
+    def BalQueryTest(self):
+        if not self.data.get("businessid"):
+            raise PubErrorCustom("商户ID为空!")
 
         # user = AccountBase(userid=self.user.userid,amount=1).query()
 
