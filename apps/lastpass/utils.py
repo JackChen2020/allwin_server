@@ -4668,8 +4668,8 @@ class LastPass_YSLH(LastPassBase):
 
         #生产环境
         self.create_order_url="http://www.bianjiezf.com/Pay_Index.html"
-        self.secret = "785g5ykawr9jkzgw9qpkh562w5dhvsfp"
-        self.businessId = "190649615"
+        self.secret = "vodhb7l8qrg36whv1pz31p4jlrjv693w"
+        self.businessId = "11041"
 
         self.response = None
 
@@ -4729,12 +4729,12 @@ class LastPass_YSLH(LastPassBase):
 
     def call_run(self):
         self.check_sign()
-        if not self.data.get("memberid") or self.data.get("memberid")!= self.businessId:
-            raise PubErrorCustom("商户ID不存在!")
-        if not self.data.get("amount") :
-            raise PubErrorCustom("金额不能为空!")
-        if not self.data.get("orderid"):
-            raise PubErrorCustom("商户订单号为空!")
+        # if not self.data.get("memberid") or self.data.get("memberid")!= self.businessId:
+        #     raise PubErrorCustom("商户ID不存在!")
+        # if not self.data.get("amount") :
+        #     raise PubErrorCustom("金额不能为空!")
+        # if not self.data.get("orderid"):
+        #     raise PubErrorCustom("商户订单号为空!")
 
         if self.data.get("returncode") == '00':
             try:

@@ -11,7 +11,7 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,LastPass_YZ
             LastPass_XINGYUANFU,LastPass_XINGYUN,LastPass_CHUANGYUAN,LastPass_WXHFYS,LastPass_SDGY,LastPass_JIABAO,LastPass_QIANWANG,\
                 LastPass_CHUANGYUAN_YUANSHENG,LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,\
                     LastPass_XINGHE,LastPass_YUANLAI,LastPass_ANJIE,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_JINGDONG,\
-                        LastPass_BAWANGKUAIJIE,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO
+                        LastPass_BAWANGKUAIJIE,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO,LastPass_YSLH
 
 from rest_framework.response import Response
 from django.db import transaction
@@ -729,4 +729,14 @@ class LastPassAPIView(GenericViewSetCustom):
         for item in request.data:
             data[item] = request.data[item]
         LastPass_IPAYZHIFUBAO(data=data).call_run()
+        return None
+
+
+    @list_route(methods=['POST'])
+    @Ty_Core_connector()
+    def yslh_callback(self, request, *args, **kwargs):
+        data={}
+        for item in request.data:
+            data[item] = request.data[item]
+        LastPass_YSLH(data=data).call_run()
         return None
