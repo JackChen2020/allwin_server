@@ -764,7 +764,7 @@ class CreateOrder(object):
         elif str(self.paypasslinktype.passid) in ['44','65']:
 
             if str(self.paypasslinktype.passid) == '44':
-                terminal = "H5"
+                terminal = "WEIXIN_PAY_WAP"
             else:
                 terminal = "ALI_PAY_WAP"
             request_data = {
