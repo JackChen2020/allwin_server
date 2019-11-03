@@ -18,6 +18,7 @@ from Crypto.Signature import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 from Crypto.Hash import SHA,SHA256
 
+from pyDes import des,PAD_PKCS5
 
 import base64
 #
@@ -3384,8 +3385,14 @@ class LastPass_KUAIJIE(LastPassBase):
         #订单生成地址
         self.create_order_url="http://epay.hyhope.top/portal"
 
-        #代付提交地址
-        self.df_url = "http://api.marketfree.top/agentPayment/paySingle"
+        # 代付提交地址
+        self.df_url = "http://api.hyhope.top/agentPayment/paySingle"
+
+        # 代付余额查询
+        self.df_bal_query_url = "http://api.hyhope.top/agentPayment/payBalanceQuery"
+
+        # 代付订单查询
+        self.df_order_query_url = "http://api.hyhope.top/agentPayment/paySingleQuery"
 
         self.secret = "a1a05672g9b7825872235f2ba350b75d8f430c31655g67a4156g3718186g2580"
         self.businessId = "100000000064907"
@@ -3428,6 +3435,17 @@ class LastPass_KUAIJIE(LastPassBase):
         # print(self.response)
         self.response = result.content
 
+    def _request_df(self):
+        print(json.dumps(self.data))
+        # print(self.data)
+        result = request(method='POST', url=self.df_url, data=self.data, verify=True)
+        # print(result.content)
+        # self.response=json.loads(result.content.decode('utf-8'))
+        # print(self.response)
+        res = json.loads(result.content.decode('utf-8'))
+        if res['status'] != 'succ':
+            raise PubErrorCustom(res['errMsg'])
+
 
     def run(self):
         self.data.setdefault('service',"online_pay")
@@ -3467,17 +3485,36 @@ class LastPass_KUAIJIE(LastPassBase):
 
             PayCallLastPass().run(order=order)
 
+    def encrypt(self,content, key):
+
+        k = des(key=key,
+                pad=None,
+                padmode=PAD_PKCS5)
+        # return base64.b64encode(k.encrypt(content))
+
+        return k.encrypt(content).hex()
+
+    def decrypt(self,content,key):
+
+        content = base64.b64decode(content)
+
+        k = des(key=key,
+                pad=None,
+                padmode=PAD_PKCS5)
+
+        return k.decrypt(content).decode('utf-8')
+
 
     def df_return_content(self):
 
 
-        cardno = "6226000000000000"
-        name = "小明"
-        bankname = "中国工商银行"
+        cardno = "6226621704181682"
+        name = "陈丽红"
+        bankname = "中国光大银行"
         type = "私"
-        amount = 0.08
+        amount = 50.0
         bizhong = 'CNY'
-        ordercode = "10000001"
+        ordercode = "DF00000001"
         remark = "备注"
 
         content = "{},{},{},{},{},{},{},{},{}".format(
@@ -3491,9 +3528,59 @@ class LastPass_KUAIJIE(LastPassBase):
             ordercode,
             remark
         )
-        print(content)
-        return content
+        return self.encrypt(content.encode('utf-8'),self.secret[:8])
 
+    def df_bal_query(self):
+
+        encrypted = ("customerNo={}{}".format(self.businessId,self.secret)).encode("utf-8")
+        print(encrypted)
+
+        self.data.setdefault("sign",hashlib.md5(encrypted).hexdigest())
+        self.data.setdefault("customerNo",self.businessId)
+
+        print(json.dumps(self.data))
+        result = request(method='POST', url=self.df_bal_query_url, data=self.data, verify=True)
+        res = json.loads(result.content.decode('utf-8'))
+        # print(res)
+        if res['status'] != 'succ':
+            raise PubErrorCustom(res['errMsg'])
+
+        return res['errMsg']
+
+    def df_order_query(self):
+
+        self.data.setdefault("customerNo",self.businessId)
+        self.data.setdefault("inputCharset","UTF-8")
+        self.data.setdefault("payVersion",'00')
+        self.data.setdefault("tradeCustorder","DF00000002")
+        self.data.setdefault("payDate",UtilTime().arrow_to_string(format_v="YYYYMMDD"))
+        self._sign()
+        self.data.setdefault('signType',"MD5")
+
+        from urllib.parse import unquote
+        print(json.dumps(self.data))
+        result = request(method='POST', url=self.df_order_query_url, data=self.data, verify=False)
+        res = json.loads(result.content.decode('utf-8'))
+        print(res)
+        print(unquote(res['tradeReason'], 'utf-8'))
+
+        self.data = res
+        sign = self.data.pop('sign')
+        signType = self.data.pop('signType')
+
+        if str(res['status']) != 'succ':
+            raise PubErrorCustom(res['errMsg'])
+
+        self._sign()
+        if sign != self.data.get('sign'):
+            raise PubErrorCustom("签名错误!")
+
+        return res
+
+        # if res['status'] != 'succ':
+        #     raise PubErrorCustom(res['errMsg'])
+        #
+        # return res['errMsg']
 
     def df_api(self):
         self.data.setdefault('customerNo', self.businessId)
@@ -3502,10 +3589,18 @@ class LastPass_KUAIJIE(LastPassBase):
         self.data.setdefault('inputCharset', "00")
 
         self.data.setdefault('content',self.df_return_content())
+        self.data.setdefault('payVersion',"00")
 
         self._sign()
 
         self.data.setdefault('signType', "MD5")
+
+        self._request_df()
+
+        if self.response['status'] !='succ':
+            raise PubErrorCustom(self.response['errMsg'])
+
+        return self.response
 
 class LastPass_ALLWIN(LastPassBase):
     def __init__(self,**kwargs):
@@ -4739,6 +4834,100 @@ class LastPass_YSLH(LastPassBase):
         if self.data.get("returncode") == '00':
             try:
                 order = Order.objects.select_for_update().get(ordercode=self.data.get("orderid"))
+            except Order.DoesNotExist:
+                raise PubErrorCustom("订单号不正确!")
+
+            if order.status == '0':
+                raise PubErrorCustom("订单已处理!")
+
+            PayCallLastPass().run(order=order)
+
+
+class LastPass_HUIHUANG(LastPassBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+
+        #生产环境
+        self.create_order_url="http://47.56.122.113:3020/api/pay/create_order"
+        self.secret = "OMMM3PXQF3AXUQKRGTTSCLM7MEA5ZLC2GFBNE9GEPJZL3SGABGRE7H6SEVM1JRF2QUZRONCXO8WQ65CC960HE1M29LW4AX53DD6OKSOYKHVKEKVA8WB0JPTX6GXGU738"
+        self.businessId = 20000009
+
+        self.appId = 'e136451fefa74b7da90ac4101cc0fed3'
+
+        # self.productId = '98c51ce4ac6f44d5aed38892d5bd09d1'
+
+        self.response = None
+
+    def _sign(self):
+
+        valid_data = {}
+        # 去掉value为空的值
+        for item in self.data:
+            if str(self.data[item]) and len(str(self.data[item])):
+                valid_data[item] = self.data[item]
+
+        # 排序固定位置
+        valid_data_keys = sorted(valid_data)
+        valid_orders_data = OrderedDict()
+        for key in valid_data_keys:
+            valid_orders_data[key] = valid_data[key]
+
+        valid_orders_data['key']=self.secret
+
+        # 将数据变成待加密串
+        encrypted = str()
+        for item in valid_orders_data:
+            encrypted += "{}={}&".format(item, valid_orders_data[item])
+        encrypted = encrypted[:-1].encode("utf-8")
+        print(encrypted)
+        self.data['sign'] = hashlib.md5(encrypted).hexdigest().upper()
+
+    def check_sign(self):
+        sign = self.data.pop('sign',False)
+        self._sign()
+        if self.data['sign'] != sign:
+            raise PubErrorCustom("签名不正确")
+
+    def _request(self):
+        result = request(method='POST', url=self.create_order_url, data=self.data, verify=True)
+        self.response = json.loads(result.content.decode('utf-8'))
+
+    def run(self):
+        self.data.setdefault('mchId',self.businessId)
+        self.data.setdefault('appId',self.appId)
+
+        self.data.setdefault('return_url', url_join("/pay/#/juli"))
+        # self.data.setdefault('productId', self.productId)
+        self.data.setdefault('currency','cny')
+
+        # self.data.setdefault('productId', self.productId)
+        self.data.setdefault('subject','商品P')
+        self.data.setdefault('body', '商品P6666')
+
+        # self.data.setdefault('pay_bankcode',"904")
+        self._sign()
+
+
+        try:
+            self._request()
+            print(self.response)
+            return (False, self.response['retMsg']) if self.response['retCode']!='SUCCESS' else (True,self.response['payParams']['payUrl'])
+        except Exception as e:
+            return (False,str(e))
+
+    def call_run(self):
+        self.check_sign()
+        if not self.data.get("amount") :
+            raise PubErrorCustom("金额不能为空!")
+        if not self.data.get("mchOrderNo"):
+            raise PubErrorCustom("商户订单号为空!")
+
+        self.data["amount"] = float(self.data.get("amount")) / 100.0
+
+        if str(self.data.get("status")) == '2':
+            try:
+                order = Order.objects.select_for_update().get(ordercode=self.data.get("mchOrderNo"))
             except Order.DoesNotExist:
                 raise PubErrorCustom("订单号不正确!")
 

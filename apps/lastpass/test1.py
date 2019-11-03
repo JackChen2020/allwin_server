@@ -107,6 +107,9 @@ class LastPass_BAWANGKUAIJIE(LastPassBase):
         #代付地址
         self.daifu_url = "http://orderpay.xincheng-sh.com:8088/webwt/pay/gateway.do"
 
+
+        self.bal_query_url="http://orderpay.xincheng-sh.com:8088/agentPayment/payBalanceQuery"
+
         self.secret = "fcdd45eba6164b9cb2affed11b205d50"
 
         #私钥
@@ -244,8 +247,6 @@ class LastPass_BAWANGKUAIJIE(LastPassBase):
             raise  PubErrorCustom("支付状态有误!")
 
 
-
-
     def df_return_content(self):
 
 
@@ -295,6 +296,12 @@ class LastPass_KUAIJIE(LastPassBase):
 
         #代付提交地址
         self.df_url = "http://api.hyhope.top/agentPayment/paySingle"
+
+        #代付余额查询
+        self.df_bal_query_url = "http://api.hyhope.top/agentPayment/payBalanceQuery"
+
+        #代付订单查询
+        self.df_order_query_url = "http://api.hyhope.top/agentPayment/paySingleQuery"
 
         self.secret = "a1a05672g9b7825872235f2ba350b75d8f430c31655g67a4156g3718186g2580"
         self.businessId = "100000000064907"
@@ -433,6 +440,58 @@ class LastPass_KUAIJIE(LastPassBase):
         )
         return self.encrypt(content.encode('utf-8'),self.secret[:8])
 
+    def df_bal_query(self):
+
+        encrypted = ("customerNo={}{}".format(self.businessId,self.secret)).encode("utf-8")
+        print(encrypted)
+
+        self.data.setdefault("sign",hashlib.md5(encrypted).hexdigest())
+        self.data.setdefault("customerNo",self.businessId)
+
+        print(json.dumps(self.data))
+        result = request(method='POST', url=self.df_bal_query_url, data=self.data, verify=True)
+        res = json.loads(result.content.decode('utf-8'))
+        # print(res)
+        if res['status'] != 'succ':
+            raise PubErrorCustom(res['errMsg'])
+
+        return res['errMsg']
+
+    def df_order_query(self):
+
+        self.data.setdefault("customerNo",self.businessId)
+        self.data.setdefault("inputCharset","UTF-8")
+        self.data.setdefault("payVersion",'00')
+        self.data.setdefault("tradeCustorder","DF00000002")
+        self.data.setdefault("payDate",UtilTime().arrow_to_string(format_v="YYYYMMDD"))
+        self._sign()
+        self.data.setdefault('signType',"MD5")
+
+        from urllib.parse import unquote
+        print(json.dumps(self.data))
+        result = request(method='POST', url=self.df_order_query_url, data=self.data, verify=False)
+        res = json.loads(result.content.decode('utf-8'))
+        print(res)
+        print(unquote(res['tradeReason'], 'utf-8'))
+
+
+        self.data = res
+        sign = self.data.pop('sign')
+        signType = self.data.pop('signType')
+
+        self._sign()
+        if sign != self.data.get('sign'):
+            print("签名错误!")
+
+        if str(res['status']) != 'succ':
+            print("111")
+            print(res['errMsg'])
+
+
+        # if res['status'] != 'succ':
+        #     raise PubErrorCustom(res['errMsg'])
+        #
+        # return res['errMsg']
 
     def df_api(self):
         self.data.setdefault('customerNo', self.businessId)
@@ -462,6 +521,6 @@ if __name__=='__main__':
     # #     "memberId" : "1"
     # # }
     #
-    res = LastPass_KUAIJIE(data={}).df_api()
-    print(res)
+    res = LastPass_KUAIJIE(data={}).df_order_query()
+    # print(res)
     # # print(res['retMsg'])

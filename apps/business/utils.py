@@ -13,7 +13,8 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
                 LastPass_JLFZFB,LastPass_WXHFYS,LastPass_ZFBHFYS,LastPass_SDGY,LastPass_JIABAO,LastPass_QIANWANG,LastPass_CHUANGYUAN_YUANSHENG,\
                     LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,LastPass_XINGHE,LastPass_YUANLAI,\
                         LastPass_JINGSHA,LastPass_ANJIE,LastPass_hahapay,LastPass_SHUIJING,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_BAWANGKUAIJIE,\
-                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO,LastPass_YSLH
+                            LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO,LastPass_YSLH, \
+                                LastPass_HUIHUANG
 
 class CreateOrder(object):
 
@@ -991,6 +992,26 @@ class CreateOrder(object):
             with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
                 f1.write(res[1])
             return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+
+        elif str(self.paypasslinktype.passid) in ['63','64']:
+
+            if str(self.paypasslinktype.passid) == '63':
+                id = "8007"
+            else:
+                id = "8003"
+
+            request_data = {
+                "amount": int(float(self.order.amount) * float(100.0)),
+                "mchOrderNo": str(self.order.ordercode),
+                "notifyUrl": url_join('/callback_api/lastpass/jiahui_callback'),
+                "productId": id
+            }
+            res = LastPass_HUIHUANG(data=request_data).run()
+            if not res[0]:
+                raise PubErrorCustom(res[1])
+
+            return {"path": res[1]}
+
 
     def run(self):
         self.check_request_param()
