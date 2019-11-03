@@ -156,8 +156,8 @@ class CreateOrder(object):
             if int(amount) not in [50,100,200]:
                 raise PubErrorCustom("金额范围在[50,100,200]")
 
-        if amount % 1 == 0 and str(self.paypasslinktype.passid) in ['63','64']:
-            if int(amount) not in [30,50,100]:
+        if str(self.paypasslinktype.passid) in ['63','64']:
+            if float(amount) not in [30.0,50.0,100.0]:
                 raise PubErrorCustom("金额范围在[30,50,100]")
 
         if str(self.paypasslinktype.passid) in ['44']:
