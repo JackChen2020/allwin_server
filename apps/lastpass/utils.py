@@ -4891,10 +4891,10 @@ class LastPass_HUIHUANG(LastPassBase):
 
     def _request(self):
         data={
-            "params" : self.data
+            "params" : json.dumps(self.data)
         }
         print(json.dumps(data))
-        result = request(method='POST', url=self.create_order_url, params=data , data=data,json=data,verify=False)
+        result = request(method='POST', url=self.create_order_url, data=data,verify=False)
         print(result.text)
         self.response = json.loads(result.content.decode('utf-8'))
 
