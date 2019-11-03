@@ -4890,7 +4890,10 @@ class LastPass_HUIHUANG(LastPassBase):
             raise PubErrorCustom("签名不正确")
 
     def _request(self):
-        result = request(method='POST', url=self.create_order_url, params=self.data, verify=False)
+        data={
+            "params" : self.data
+        }
+        result = request(method='POST', url=self.create_order_url, data=data,json=data ,verify=False)
         print(result.text)
         self.response = json.loads(result.content.decode('utf-8'))
 
