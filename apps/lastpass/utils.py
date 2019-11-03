@@ -2984,7 +2984,7 @@ class LastPass_XINGHE(LastPassBase):
     def run(self):
         self.data.setdefault('mer_id',self.businessId)
         self.data.setdefault('timestamp',self.obtaindate())
-        self.data.setdefault('terminal',"H5")
+        # self.data.setdefault('terminal',"H5")
         self.data.setdefault('version',"01")
         self.data.setdefault('backurl',url_join("/pay/#/juli"))
         self.data.setdefault('failUrl', url_join("/pay/#/juli"))

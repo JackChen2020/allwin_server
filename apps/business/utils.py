@@ -160,9 +160,9 @@ class CreateOrder(object):
             if float(amount) not in [30.0,50.0,100.0]:
                 raise PubErrorCustom("金额范围在[30,50,100]")
 
-        if str(self.paypasslinktype.passid) in ['44']:
-            if int(amount) not in [98,198,298,498,998,1998,2998,3998,4998]:
-                raise PubErrorCustom("金额范围在[98,198,298,498,998,1998,2998,3998,4998]")
+        if str(self.paypasslinktype.passid) in ['44','65']:
+            if float(amount) not in [324.0,475.0,569.0,670.0,814.0,916.0,1366.0,1978.0,2308.0,2793.0,3438.0,3058.0,3891.0,4577.0]:
+                raise PubErrorCustom("金额范围在[324,475,569,670,814,916,1366,1978,2308,2793,3438,3058,3891,4577]")
 
         if str(self.paypasslinktype.passid) == '48':
             if float(amount) not in [100.0,200.0,300.0,400.0,500.0]:
@@ -761,12 +761,17 @@ class CreateOrder(object):
 
             return {"path": res[1]}
         # 星河
-        elif str(self.paypasslinktype.passid) == '44':
+        elif str(self.paypasslinktype.passid) in ['44','65']:
 
+            if str(self.paypasslinktype.passid) == '44':
+                terminal = "H5"
+            else:
+                terminal = "ALI_PAY_WAP"
             request_data = {
                 "businessnumber": str(self.order.ordercode),
                 "amount": int(float(self.order.amount) * float(100.0)),
-                "ServerUrl": url_join('/callback_api/lastpass/xinghe_callback')
+                "ServerUrl": url_join('/callback_api/lastpass/xinghe_callback'),
+                "terminal" : terminal
             }
             res = LastPass_XINGHE(data=request_data).run()
             if not res[0]:
