@@ -1004,7 +1004,8 @@ class CreateOrder(object):
                 "amount": int(float(self.order.amount) * float(100.0)),
                 "mchOrderNo": str(self.order.ordercode),
                 "notifyUrl": url_join('/callback_api/lastpass/jiahui_callback'),
-                "productId": id
+                "productId": id,
+                "clientIp" : self.order.client_ip
             }
             res = LastPass_HUIHUANG(data=request_data).run()
             if not res[0]:
