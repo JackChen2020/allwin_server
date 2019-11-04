@@ -14,7 +14,7 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
                     LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,LastPass_XINGHE,LastPass_YUANLAI,\
                         LastPass_JINGSHA,LastPass_ANJIE,LastPass_hahapay,LastPass_SHUIJING,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_BAWANGKUAIJIE,\
                             LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO,LastPass_YSLH, \
-                                LastPass_HUIHUANG
+                                LastPass_HUIHUANG,LastPass_JUXINGNEW
 
 class CreateOrder(object):
 
@@ -1021,7 +1021,41 @@ class CreateOrder(object):
                 raise PubErrorCustom(res[1])
 
             return {"path": res[1]}
+        elif str(self.paypasslinktype.passid) == '66':
 
+            pay_bankcode = "903"
+            request_data = {
+                "pay_orderid": str(self.order.ordercode),
+                "pay_amount": self.order.amount,
+                "pay_notifyurl": url_join('/callback_api/lastpass/juxingnew_callback'),
+                "pay_bankcode": pay_bankcode
+            }
+            res = LastPass_JUXINGNEW(data=request_data).run()
+            if not res[0]:
+                raise PubErrorCustom("生成订单失败,请稍后再试!")
+
+            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
+                f1.write(res[1])
+            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+        elif str(self.paypasslinktype.passid)  in ['66','67']:
+
+            if str(self.paypasslinktype.passid)=='66':
+                pay_bankcode = "904"
+            else:
+                pay_bankcode = "905"
+            request_data = {
+                "pay_orderid": str(self.order.ordercode),
+                "pay_amount": self.order.amount,
+                "pay_notifyurl": url_join('/api/lastpass/juxingnew_callback'),
+                "pay_bankcode": pay_bankcode
+            }
+            res = LastPass_JUXINGNEW(data=request_data).run()
+            if not res[0]:
+                raise PubErrorCustom("生成订单失败,请稍后再试!")
+
+            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
+                f1.write(res[1])
+            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
 
     def run(self):
         self.check_request_param()
