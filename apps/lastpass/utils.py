@@ -5087,11 +5087,15 @@ class LastPass_LONGSHI(LastPassBase):
 
         self.data.setdefault('pay_productname',"商品")
 
-        try:
-            self._request()
-            return (True,self.response)
-        except Exception as e:
-            return (False,str(e))
+        self.data.setdefault('create_order_url',self.create_order_url)
+
+        return self.data
+
+        # try:
+        #     self._request()
+        #     return (True,self.response)
+        # except Exception as e:
+        #     return (False,str(e))
 
     def call_run(self):
         # self.check_sign()

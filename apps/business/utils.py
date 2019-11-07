@@ -1068,12 +1068,14 @@ class CreateOrder(object):
                 "pay_bankcode": pay_bankcode
             }
             res = LastPass_LONGSHI(data=request_data).run()
-            if not res[0]:
-                raise PubErrorCustom("生成订单失败,请稍后再试!")
+            # if not res[0]:
+            #     raise PubErrorCustom("生成订单失败,请稍后再试!")
 
-            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
-                f1.write(res[1])
-            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+            # with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
+            #     f1.write(res[1])
+            # return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+            #
+            return {"res": res, "userid": self.order.userid, "ordercode": self.order.ordercode, "htmlfile": "pay.html"}
 
     def run(self):
         self.check_request_param()
