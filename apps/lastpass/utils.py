@@ -5221,7 +5221,41 @@ class LastPass_GCPAYS(LastPassBase):
 
         res = self.redis_client.rpop(self.lKey)
         if res:
+            res = res.decode('utf-8')
             print("回调开始:{}".format(res))
+
+            url = self.create_order_url + '/paid/query/in/order/id'
+
+            data=dict(
+                orderNo = res
+            )
+            data['sign'] = md5pass("{}{}{}".format(
+                str(self.appId),
+                str(data['orderNo']),
+                str(self.keyStore),
+            ))
+            self.sso()
+            result = request('POST', url=url, json=data, verify=False,
+                             headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+            res = json.loads(result.content.decode('utf-8'))
+
+            print(res)
+            if res.get("code") != 0:
+                print("对方服务器出错{}".format(res.get("msg")))
+                self.redis_client.lpush(self.lKey,res)
+                return
+
+            if str(res.get("data").get("payStatus")) != "1":
+                self.redis_client.lpush(self.lKey,res)
+                print("充值未成功!")
+                return
+
+            if str(res.get("data").get("examineStatus")) != "2":
+                self.redis_client.lpush(self.lKey,res)
+                print("审核未成功!")
+                return
+
             request_data = {
                 "orderid": res
             }
@@ -5232,7 +5266,6 @@ class LastPass_GCPAYS(LastPassBase):
                              json=request_data, verify=False)
 
             if result.text != 'success':
-                self.redis_client.lpush(self.lKey,res)
                 print("请求对方服务器错误{}:{}".format(str(result.text), res))
 
 

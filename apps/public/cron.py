@@ -41,6 +41,7 @@ def neichong_callback():
     内冲回调
     :return:
     """
+    print("开始内冲回调", UtilTime().today)
     LastPass_GCPAYS(data={}).callback_run()
 
 def order_valid_task():
