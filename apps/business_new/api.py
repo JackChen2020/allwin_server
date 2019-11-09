@@ -57,4 +57,4 @@ class BusinessNewAPIView(GenericViewSetCustom):
     @Core_connector_DAIFU()
     def CardPays(self,request):
 
-        return LastPass_GCPAYS(request.data).run()
+        return LastPass_GCPAYS(data=request.data).run()
