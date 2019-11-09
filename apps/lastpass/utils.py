@@ -21,6 +21,7 @@ from Crypto.Hash import SHA,SHA256
 from pyDes import des,PAD_PKCS5
 
 import base64
+from apps.utils import RedisHandler
 #
 # if __name__ == '__main__':
 #     data = {
@@ -5117,6 +5118,65 @@ class LastPass_LONGSHI(LastPassBase):
 
             PayCallLastPass().run(order=order)
 
+
+class LastPass_GCPAYS(LastPassBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+        # 订单生成地址
+        self.create_order_url = "http://47.97.62.178"
+
+        self.appId = "G11959365W92A99213979DA592"
+        self.appSecret = "12acb033b3065ae85306969c95ae40ecfee40cf7"
+
+        self.username = "1018125792@qq.com"
+        self.password = "hxzym@123456"
+
+        self.keyStore = "7312Acs2"
+
+        self.redis_client = RedisHandler("GCPAYS_TOKEN")
+
+        self.token = self.redis_client.get(self.redis_client.key)
+
+    def getToken(self):
+        url = self.create_order_url + '/oauth/token'
+        data = dict(
+            client_id=self.appId,
+            client_secret=self.appSecret,
+            grant_type="password",
+            username=self.username,
+            password=self.password
+        )
+        print(json.dumps(data))
+        result = request('POST', url=url,
+                         data=data, verify=False)
+        # result = request('POST', url=url,
+        #                  data=data, verify=False )
+
+        return json.loads(result.content.decode('utf-8'))
+
+    def sso(self):
+
+        if not self.token:
+            res = self.getToken()
+
+            self.token = res['access_token']
+
+            self.redis_client.set(self.redis_client.key , self.token)
+            self.redis_client.expire(self.redis_client.key, res['expires_in']-60)
+
+            url = self.create_order_url + '/user/profile/v1/info'
+            result = request('GET', url=url, verify=False, headers={
+                "ACCESSTOKEN": self.token
+            })
+            res = json.loads(result.content.decode('utf-8'))
+            if res.get("code") != 0:
+                raise PubErrorCustom("鉴权失败：{}".format(res.get("msg")))
+
+
+    def run(self):
+        print(self.data.get("request"))
+        
 if __name__=="__main__":
 
     request_data = {

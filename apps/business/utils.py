@@ -1076,6 +1076,14 @@ class CreateOrder(object):
             # return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
             #
             return {"res": res, "userid": self.order.userid, "ordercode": self.order.ordercode, "htmlfile": "pay.html"}
+        elif str(self.paypasslinktype.passid)  == '69':
+
+            data={
+                "amount" : float(self.order.amount),
+                "order" : self.order.ordercode,
+                "url" : url_join('/api_new/business/CardPays')
+            }
+            return {"res": data, "userid": self.order.userid, "ordercode": self.order.ordercode, "htmlfile": "neichong.html"}
 
     def run(self):
         self.check_request_param()

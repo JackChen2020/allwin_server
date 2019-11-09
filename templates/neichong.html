@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta name="renderer" content="webkit"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>支付请求</title>
+    <link href="https://mkpay.xincheng-sh.com:8099/clpay/lib/iconfont/iconfont.css" type="text/css" rel="stylesheet">
+    <link href="https://mkpay.xincheng-sh.com:8099/clpay/lib/layui/css/layui.css" type="text/css" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/html5shiv.js"></script>
+    <script src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/respond.js"></script>
+    <![endif]-->
+    <link rel="stylesheet" type="text/css" href="https://mkpay.xincheng-sh.com:8099/clpay/lib/css/resetStyle.css"/>
+    <link rel="stylesheet" type="text/css" href="https://mkpay.xincheng-sh.com:8099/clpay/lib/css/resetUi.css"/>
+    <link rel="stylesheet" type="text/css" href="https://mkpay.xincheng-sh.com:8099/clpay/css/ftl/easyPayWeb.css"/>
+    <link rel="stylesheet" type="text/css" href="https://mkpay.xincheng-sh.com:8099/clpay/css/ftl/easyPayWebG.css"/>
+</head>
+<body style="background-color: #fff" onload="initDataCheck()">
+<div class="header_wrap">
+    <div class="header">
+        <div class="fl">
+            <a id="header-online-unionpay-href-id2" class="logo_unionPay" style="background:url(https://mkpay.xincheng-sh.com:8099/clpay/images/unionpay.jpg) no-repeat 0 0;">银联在线支付</a>
+            <div id="upgg_location-87"></div>
+        </div>
+        <div class="fr">
+            <p class="userlogin">
+        
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="content clearfix">
+    <div class="head"></div>
+
+    <div class="order_main">
+        <p class="order_sum">
+            <span class="item_title">订单金额：</span>
+            <em class="orderAmt"></em>
+            <em>{{data.amount}}</em><em>元</em>
+
+        </p>
+        <p class="order_num" title="{{data.ordercode}}" ></p>
+        <p class="fr txt_over"><span class="order_msg">请您在10分钟内完成支付，以免订单失效</span></p>
+    </div>
+
+
+
+    <form action="{{data.url}}" method="post" onsubmit="return check()">
+        <div class="blue_tab">
+            <div class="tab_content">
+                <div class="content_main" id="content-div-id">
+                    <div class="list" id="content-list">
+                        <div class="listrow">
+                            <div class="list_head">直接付款</div>
+                        </div>
+                        <div class="listrow">
+                            <div class="list_prompt1">1.输入卡号 </div>
+                            <div class="list_prompt2">=> 2.输入验证信息</div>
+                            <div class="list_prompt3">=> 3.完成支付</div>
+                        </div>
+  <div class="listrow cardrow" style="margin-bottom:14px;width: 880px;">
+                            <div class="list_right">
+    <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>银行卡号：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" placeholder="储蓄卡" class="layui-input" name="bankCardNo" style="width: 280px;">
+                                </div>
+                            </div>
+                            <div class="clear"></div>
+<br/>  <div class="row cl" style="margin-bottom:14px;width: 880px;">
+                            <div class="list_right">
+    <label class="form-label col-xs-4 col-sm-2"><span class="c-red">*</span>账户姓名：</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" placeholder="持卡人姓名" class="layui-input" name="custName" style="width: 280px;">
+                                </div>
+                            </div>
+                <input type="hidden" name="ordercode" value="{{ data.ordercode}}">
+                            <div class="clear"></div>
+<br/>  <div class="row cl" style="margin-bottom:14px;width: 880px;">
+                            <div class="clear"></div>
+                        <div class="payrow">
+                            <p style="padding-top:0px">
+                                <input id="nextBtn" style="color:#fff;width:103px;height:40px;background-image: url(https://mkpay.xincheng-sh.com:8099/clpay/images/unionpaybtn.png);" type="submit" value="下一步">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <div class="blue_title">
+                <div class="ct_bg clearfix">
+                    <div class="pay_tab"><span class="tab_txt">银联卡支付</span></div>
+                    <i class="tab_sep"></i>
+
+                    <i class="tab_sep"></i>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+    <div class="pay_qa">
+        <h2>支付遇到问题？</h2>
+        <dl class="ordipay">
+            <dt>1.什么是银行预留手机号？</dt>
+            <dd style="display:block">答：银行预留手机号是您申请银行卡或办理银行卡相关业务时在银行登记的手机号。</dd>
+            <dt>2.为什么要安装控件？控件不能下载，我该如何解决？</dt>
+            <dd>答：安装输入控件可以保障您输入信息的安全，防止密码被窃取；点击密码输入框中的提示链接或<a>这里</a>下载安装。</dd>
+            <dt>3.付款时，遇到提示"网站安全证书有问题"，我该如何解决？</dt>
+            <dd>答：您需要点击<a id="basic-certification-download-id" href="" target="_blank">这里</a>重新安装浏览器根证书，安装具体过程可以点击<a id="basic-certification-download-helpview-id" href="" target="_blank">这里</a>到帮助中心中查看。浏览器根证书可用来保障您的网络购物环境更安全，让您的银联在线支付付款体验更顺畅。
+            </dd>
+
+        </dl>
+        <p class="pay_qa_more">如需查看更多问题，请联系客服
+        </p>
+    </div>
+
+
+</div>
+
+
+
+</div>
+
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/jquery-1.12.2.min.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/layui/layui.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/json2.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/jquery.cookie.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/jquery.nicescroll.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/jsrender-min.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/easy.ajax.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/drag-arrange.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/js/ftl/easyPayWebCheck.js"></script>
+<script type="text/javascript" src="https://mkpay.xincheng-sh.com:8099/clpay/lib/js/require.js" data-main="js/ftl/easyPayWeb"></script>
+</body>
+</html>

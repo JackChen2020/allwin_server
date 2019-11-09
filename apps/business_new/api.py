@@ -6,6 +6,7 @@ from core.decorator.response_new import Core_connector,Core_connector_DAIFU
 from apps.business.utils import CreateOrder
 from apps.business_new.df_api import dfHandler
 from apps.business_new.jd_api import jdHandler
+from apps.lastpass.utils import LastPass_GCPAYS
 
 
 class BusinessNewAPIView(GenericViewSetCustom):
@@ -50,3 +51,10 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def JdOrderQuery(self,request):
 
         return jdHandler(request.data).OrderQuery()
+
+
+    @list_route(methods=['POST'])
+    @Core_connector_DAIFU()
+    def CardPays(self,request):
+
+        return LastPass_GCPAYS(request.data).run()
