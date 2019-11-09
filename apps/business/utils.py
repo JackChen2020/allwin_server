@@ -1080,7 +1080,7 @@ class CreateOrder(object):
 
             data={
                 "amount" : float(self.order.amount),
-                "order" : self.order.ordercode,
+                "ordercode" : self.order.ordercode,
                 "url" : url_join('/api_new/business/CardPays')
             }
             return {"res": data, "userid": self.order.userid, "ordercode": self.order.ordercode, "htmlfile": "neichong.html"}

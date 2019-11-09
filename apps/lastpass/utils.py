@@ -5175,8 +5175,8 @@ class LastPass_GCPAYS(LastPassBase):
 
 
     def run(self):
-        print(self.data.get("request"))
-        
+        print(self.data)
+
 if __name__=="__main__":
 
     request_data = {
