@@ -5243,18 +5243,26 @@ class LastPass_GCPAYS(LastPassBase):
             res = json.loads(result.content.decode('utf-8'))
 
             print(res)
+
             if res.get("code") != 0:
                 print("对方服务器出错{}".format(res.get("msg")))
                 self.redis_client.lpush(self.lKey,ordercode)
                 return
 
-            if str(res.get("data").get("payStatus")) != "1":
+            if not res.get('data',None):
+                print("对方服务器出错{}".format(res.get("msg")))
                 self.redis_client.lpush(self.lKey,ordercode)
+                return
+
+            if str(res.get("data").get("payStatus")) != "1":
+                if str(res.get("data").get("payStatus")) == "0":
+                    self.redis_client.lpush(self.lKey,ordercode)
                 print("充值未成功!")
                 return
 
             if str(res.get("data").get("examineStatus")) != "2":
-                self.redis_client.lpush(self.lKey,ordercode)
+                if str(res.get("data").get("examineStatus")) == "1":
+                    self.redis_client.lpush(self.lKey,ordercode)
                 print("审核未成功!")
                 return
 
