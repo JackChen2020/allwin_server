@@ -5206,7 +5206,9 @@ class LastPass_GCPAYS(LastPassBase):
             raise PubErrorCustom(res.get("msg"))
 
         return render(requestObj, 'neichongGo.html', {
-            'data': res
+            'data': {
+                "url" : 'http://www.baidu.com'
+            }
         })
 
 if __name__=="__main__":
