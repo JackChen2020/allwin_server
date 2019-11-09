@@ -5134,7 +5134,7 @@ class LastPass_GCPAYS(LastPassBase):
 
         self.keyStore = "7312Acs2"
 
-        self.redis_client = RedisHandler("GCPAYS_TOKEN")
+        self.redis_client = RedisHandler(key="GCPAYS_TOKEN")
 
         self.token = self.redis_client.get(self.redis_client.key)
 

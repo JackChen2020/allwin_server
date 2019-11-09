@@ -744,8 +744,5 @@ class LastPassAPIView(GenericViewSetCustom):
     @list_route(methods=['POST'])
     @Ty_Core_connector()
     def juxingnew_callback(self, request, *args, **kwargs):
-        data={}
-        for item in request.data:
-            data[item] = request.data[item]
-        LastPass_JUXINGNEW(data=data).call_run()
+        LastPass_JUXINGNEW(data=request.data).call_run()
         return None
