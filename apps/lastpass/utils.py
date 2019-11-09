@@ -5134,9 +5134,10 @@ class LastPass_GCPAYS(LastPassBase):
 
         self.keyStore = "7312Acs2"
 
-        self.redis_client = RedisHandler(key="GCPAYS_TOKEN",db="default")
+        self.key="GCPAYS_TOKEN"
+        self.redis_client = RedisHandler(key=self.key,db="default").redis_client
 
-        self.token = self.redis_client.get(self.redis_client.key)
+        self.token = self.redis_client.get(self.key)
 
     def getToken(self):
         url = self.create_order_url + '/oauth/token'
@@ -5162,8 +5163,8 @@ class LastPass_GCPAYS(LastPassBase):
 
             self.token = res['access_token']
 
-            self.redis_client.set(self.redis_client.key , self.token)
-            self.redis_client.expire(self.redis_client.key, res['expires_in']-60)
+            self.redis_client.set(self.key , self.token)
+            self.redis_client.expire(self.key, res['expires_in']-60)
 
             url = self.create_order_url + '/user/profile/v1/info'
             result = request('GET', url=url, verify=False, headers={
