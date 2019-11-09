@@ -5215,7 +5215,72 @@ class LastPass_GCPAYS(LastPassBase):
             }
         })
 
+    def df(self,data):
+        url = self.create_order_url + '/paid//customer/send/order'
 
+        data['sign'] = md5pass("{}{}{}{}{}{}".format(
+            str(self.appId),
+            str(data['orderNo']),
+            str(data['timestap']),
+            str(data['payAmt']),
+            str(data['bankNo']),
+            str(self.keyStore),
+        ))
+
+        self.sso()
+
+        print(data)
+        result = request('POST', url=url, json=data, verify=False,
+                         headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+    def df_order_query(self,data):
+        self.sso()
+
+        data['sign'] = md5pass("{}{}{}".format(
+            str(self.appId),
+            str(data['orderNo']),
+            str(self.keyStore),
+        ))
+
+        url = self.create_order_url + '/paid/query/in/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
+
+        print(data)
+        result = request('POST', url=url, json=data, verify=False,
+                         headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+        if not res.get("data",None):
+            raise PubErrorCustom("充值失败!")
+
+        if str(res.get("data").get("payStatus")) == '0':
+            return "充值中"
+        elif str(res.get("data").get("payStatus")) == '1':
+            return "充值成功"
+        else:
+            return "充值失败"
+
+    def df_bal_query(self):
+        self.sso()
+        url = self.create_order_url + '/web/query/customer'
+
+        result = request('POST', url=url, verify=False,
+                         headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
+
+        res = json.loads(result.content.decode('utf-8'))
+
+        if res.get("code") != 0:
+            raise PubErrorCustom(res.get("msg"))
+
+        return float(res.get("data").get("customerAmt"))
 
     def callback_run(self):
 
@@ -5235,14 +5300,12 @@ class LastPass_GCPAYS(LastPassBase):
                 str(self.keyStore),
             ))
             url += "/{}/{}".format(ordercode,data.get("sign"))
-            print(url)
+
             self.sso()
             result = request('POST', url=url, json=data, verify=False,
                              headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
             res = json.loads(result.content.decode('utf-8'))
-
-            print(res)
 
             if res.get("code") != 0:
                 print("对方服务器出错{}".format(res.get("msg")))
@@ -5265,6 +5328,8 @@ class LastPass_GCPAYS(LastPassBase):
                     self.redis_client.lpush(self.lKey,ordercode)
                 print("审核未成功!")
                 return
+
+            print(res)
 
             request_data = {
                 "orderid": ordercode
