@@ -5195,7 +5195,7 @@ class LastPass_GCPAYS(LastPassBase):
             str(data['bankNo']),
             str(self.keyStore),
         ))
-
+        print(data)
         url= self.create_order_url + '/paid/customer/send/pay/order'
         result = request('POST', url=url,
                          json=data, verify=False,headers={

@@ -1,7 +1,7 @@
 from apps.utils import GenericViewSetCustom
 from rest_framework.decorators import list_route
 
-from core.decorator.response_new import Core_connector,Core_connector_DAIFU
+from core.decorator.response_new import Core_connector,Core_connector_DAIFU,Core_connector_NEICHONG
 
 from apps.business.utils import CreateOrder
 from apps.business_new.df_api import dfHandler
@@ -54,7 +54,7 @@ class BusinessNewAPIView(GenericViewSetCustom):
 
 
     @list_route(methods=['POST'])
-    @Core_connector_DAIFU()
+    @Core_connector_NEICHONG()
     def CardPays(self,request):
         data={}
         for item in request.data:
