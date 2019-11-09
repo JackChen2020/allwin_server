@@ -5221,19 +5221,21 @@ class LastPass_GCPAYS(LastPassBase):
 
         res = self.redis_client.rpop(self.lKey)
         if res:
-            res = res.decode('utf-8')
-            print("回调开始:{}".format(res))
+            ordercode = res.decode('utf-8')
+            print("回调开始:{}".format(ordercode))
 
             url = self.create_order_url + '/paid/query/in/order/id'
 
             data=dict(
-                orderNo = res
+                orderNo = ordercode
             )
             data['sign'] = md5pass("{}{}{}".format(
                 str(self.appId),
                 str(data['orderNo']),
                 str(self.keyStore),
             ))
+            url += "/{}/{}".format(ordercode,data.get("sign"))
+            print(url)
             self.sso()
             result = request('POST', url=url, json=data, verify=False,
                              headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
@@ -5243,21 +5245,21 @@ class LastPass_GCPAYS(LastPassBase):
             print(res)
             if res.get("code") != 0:
                 print("对方服务器出错{}".format(res.get("msg")))
-                self.redis_client.lpush(self.lKey,res)
+                self.redis_client.lpush(self.lKey,ordercode)
                 return
 
             if str(res.get("data").get("payStatus")) != "1":
-                self.redis_client.lpush(self.lKey,res)
+                self.redis_client.lpush(self.lKey,ordercode)
                 print("充值未成功!")
                 return
 
             if str(res.get("data").get("examineStatus")) != "2":
-                self.redis_client.lpush(self.lKey,res)
+                self.redis_client.lpush(self.lKey,ordercode)
                 print("审核未成功!")
                 return
 
             request_data = {
-                "orderid": res
+                "orderid": ordercode
             }
 
             result = request('POST',
@@ -5266,7 +5268,7 @@ class LastPass_GCPAYS(LastPassBase):
                              json=request_data, verify=False)
 
             if result.text != 'success':
-                print("请求对方服务器错误{}:{}".format(str(result.text), res))
+                print("请求对方服务器错误{}:{}".format(str(result.text), ordercode))
 
 
 if __name__=="__main__":
