@@ -5178,7 +5178,7 @@ class LastPass_GCPAYS(LastPassBase):
                 raise PubErrorCustom("鉴权失败：{}".format(res.get("msg")))
 
 
-    def run(self,request):
+    def run(self,requestObj):
         self.sso()
 
         data= dict(
@@ -5197,17 +5197,14 @@ class LastPass_GCPAYS(LastPassBase):
         ))
         print(data)
         url= self.create_order_url + '/paid/customer/send/pay/order'
-        result = request('POST', url=url,
-                         json=data, verify=False,headers={
-                                    "Content-Type":'application/json'
-                                })
+        result = request('POST', url=url,json=data, verify=False,headers={"Content-Type":'application/json'})
 
         res = json.loads(result.content.decode('utf-8'))
         print(res)
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
-        return render(request, 'neichongGo.html', {
+        return render(requestObj, 'neichongGo.html', {
             'data': res
         })
 
