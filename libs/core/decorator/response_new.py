@@ -96,6 +96,7 @@ class Core_connector:
                     #     f1.write(html)
                     return HttpResponse(data={"html" : html}, headers=None, msg='操作成功!')
                 else:
+                    print(res['data']['res'])
                     return render(request, res['data']['htmlfile'],  {
                         'data' : res['data']['res']
                     })
