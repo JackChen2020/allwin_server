@@ -16,7 +16,7 @@ from apps.user.models import Users
 from apps.datacount.models import OrderCount
 from libs.utils.mytime import UtilTime
 
-from apps.lastpass.utils import LastPass_JINGDONG
+from apps.lastpass.utils import LastPass_JINGDONG,LastPass_GCPAYS
 
 from apps.account import AccountRefreshUpdDate
 
@@ -35,6 +35,13 @@ def jd_orders_shuaxin():
     """
     with transaction.atomic():
         LastPass_JINGDONG(data={}).queryOrder()
+
+def neichong_callback():
+    """
+    内冲回调
+    :return:
+    """
+    LastPass_GCPAYS(data={}).callback_run()
 
 def order_valid_task():
     """

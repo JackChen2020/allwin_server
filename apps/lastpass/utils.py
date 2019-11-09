@@ -5215,6 +5215,27 @@ class LastPass_GCPAYS(LastPassBase):
             }
         })
 
+
+
+    def callback_run(self):
+
+        res = self.redis_client.rpop(self.lKey)
+        if res:
+            print("回调开始:{}".format(res))
+            request_data = {
+                "orderid": res
+            }
+
+            result = request('POST',
+                             url=urllib.parse.unquote('http://allwin6666.com/callback_api/lastpass/jingdong_callback'),
+                             data=request_data,
+                             json=request_data, verify=False)
+
+            if result.text != 'success':
+                self.redis_client.lpush(self.lKey,res)
+                print("请求对方服务器错误{}:{}".format(str(result.text), res))
+
+
 if __name__=="__main__":
 
     request_data = {
