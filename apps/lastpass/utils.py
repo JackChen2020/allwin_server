@@ -5138,6 +5138,8 @@ class LastPass_GCPAYS(LastPassBase):
         self.keyStore = "7312Acs2"
 
         self.key="GCPAYS_TOKEN"
+        self.lKey = "GCPAYS_ORDER"
+
         self.redis_client = RedisHandler(key=self.key,db="default").redis_client
 
         self.token = self.redis_client.get(self.key)
@@ -5201,13 +5203,15 @@ class LastPass_GCPAYS(LastPassBase):
         result = request('POST', url=url,json=data, verify=False,headers={"Content-Type":'application/json',"ACCESSTOKEN": self.token})
 
         res = json.loads(result.content.decode('utf-8'))
-        print(res)
+
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
+        self.redis_client.lpush(self.lKey,data.get("orderNo"))
+
         return render(requestObj, 'neichongGo.html', {
             'data': {
-                "url" : 'http://www.baidu.com'
+                "url" : res.get("data")
             }
         })
 
