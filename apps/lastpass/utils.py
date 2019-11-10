@@ -5317,17 +5317,20 @@ class LastPass_GCPAYS(LastPassBase):
                 logger.info("对方服务器出错{}".format(res.get("msg")))
                 logger.info(res)
                 self.redis_client.lpush(self.lKey,ordercode)
+                time.sleep(1)
                 continue
 
             if not res.get('data',None):
                 logger.info("对方服务器出错{}".format(res.get("msg")))
                 logger.info(res)
                 self.redis_client.lpush(self.lKey,ordercode)
+                time.sleep(1)
                 continue
 
             if str(res.get("data").get("payStatus")) != "1":
                 if str(res.get("data").get("payStatus")) == "0":
                     self.redis_client.lpush(self.lKey,ordercode)
+                time.sleep(1)
                 continue
 
             if str(res.get("data").get("examineStatus")) != "2":
