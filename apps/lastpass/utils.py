@@ -5261,7 +5261,7 @@ class LastPass_GCPAYS(LastPassBase):
                 }
             })
 
-        self.redis_client.lpush(self.lKey,data.get("orderNo"))
+        self.redis_client.lpush(self.lKey,"{}|{}".format(data.get("orderNo"),UtilTime().today.replace(minutes=30).timestamp))
 
         return render(requestObj, 'neichongGo.html', {
             'data': {
@@ -5343,7 +5343,10 @@ class LastPass_GCPAYS(LastPassBase):
             logger.info(redisRes)
             if not redisRes:
                 continue
-            ordercode = redisRes.decode('utf-8')
+            ordercode = redisRes.decode('utf-8').split("|")[0]
+            endtime = redisRes.decode('utf-8').split("|")[1]
+            if UtilTime().timestamp >= int(endtime):
+                continue
             url = self.create_order_url + '/paid/query/in/order/id'
 
             data=dict(
@@ -5365,26 +5368,26 @@ class LastPass_GCPAYS(LastPassBase):
             if res.get("code") != 0:
                 logger.info("对方服务器出错{}".format(res.get("msg")))
                 logger.info(res)
-                self.redis_client.lpush(self.lKey,ordercode)
+                self.redis_client.lpush(self.lKey,"{}|{}".format(ordercode,endtime))
                 time.sleep(1)
                 continue
 
             if not res.get('data',None):
                 # logger.info("对方服务器出错{}".format(res.get("msg")))
                 # logger.info(res)
-                self.redis_client.lpush(self.lKey,ordercode)
+                self.redis_client.lpush(self.lKey,"{}|{}".format(ordercode,endtime))
                 time.sleep(1)
                 continue
 
             if str(res.get("data").get("payStatus")) != "1":
                 if str(res.get("data").get("payStatus")) == "0":
-                    self.redis_client.lpush(self.lKey,ordercode)
+                    self.redis_client.lpush(self.lKey, "{}|{}".format(ordercode, endtime))
                 time.sleep(1)
                 continue
 
             if str(res.get("data").get("examineStatus")) != "2":
                 if str(res.get("data").get("examineStatus")) == "1":
-                    self.redis_client.lpush(self.lKey,ordercode)
+                    self.redis_client.lpush(self.lKey, "{}|{}".format(ordercode, endtime))
                 continue
 
             request_data = {
