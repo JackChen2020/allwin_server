@@ -1,5 +1,4 @@
 
-
 import os
 import sys
 import django
@@ -52,13 +51,13 @@ def jd_orders_shuaxin():
     with transaction.atomic():
         LastPass_JINGDONG(data={}).queryOrder()
 
-def neichong_callback():
-    """
-    内冲回调
-    :return:
-    """
-    print("开始内冲回调", UtilTime().today)
-    LastPass_GCPAYS(data={}).callback_run()
+# def neichong_callback():
+#     """
+#     内冲回调
+#     :return:
+#     """
+#     print("开始内冲回调", UtilTime().today)
+#     LastPass_GCPAYS(data={}).callback_run()
 
 def order_valid_task():
     """

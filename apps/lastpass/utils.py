@@ -23,6 +23,8 @@ from pyDes import des,PAD_PKCS5
 import base64
 from apps.utils import RedisHandler
 
+from libs.utils.log import logger
+
 from libs.utils.string_extension import md5pass
 #
 # if __name__ == '__main__':
@@ -5286,11 +5288,11 @@ class LastPass_GCPAYS(LastPassBase):
 
     def callback_run(self):
 
-        res = self.redis_client.rpop(self.lKey)
-        if res:
-            ordercode = res.decode('utf-8')
-            print("回调开始:{}".format(ordercode))
-
+        while True:
+            redisRes = self.redis_client.rpop(self.lKey)
+            if not redisRes:
+                continue
+            ordercode = redisRes.decode('utf-8')
             url = self.create_order_url + '/paid/query/in/order/id'
 
             data=dict(
@@ -5309,31 +5311,27 @@ class LastPass_GCPAYS(LastPassBase):
 
             res = json.loads(result.content.decode('utf-8'))
 
-            print(res)
-
             if res.get("code") != 0:
-                print("对方服务器出错{}".format(res.get("msg")))
+                logger.info("对方服务器出错{}".format(res.get("msg")))
+                logger.info(res)
                 self.redis_client.lpush(self.lKey,ordercode)
                 return
 
             if not res.get('data',None):
-                print("对方服务器出错{}".format(res.get("msg")))
+                logger.info("对方服务器出错{}".format(res.get("msg")))
+                logger.info(res)
                 self.redis_client.lpush(self.lKey,ordercode)
                 return
 
             if str(res.get("data").get("payStatus")) != "1":
                 if str(res.get("data").get("payStatus")) == "0":
                     self.redis_client.lpush(self.lKey,ordercode)
-                print("充值未成功!")
                 return
 
             if str(res.get("data").get("examineStatus")) != "2":
                 if str(res.get("data").get("examineStatus")) == "1":
                     self.redis_client.lpush(self.lKey,ordercode)
-                print("审核未成功!")
                 return
-
-            print(res)
 
             request_data = {
                 "orderid": ordercode
@@ -5344,8 +5342,8 @@ class LastPass_GCPAYS(LastPassBase):
                              data=request_data,
                              json=request_data, verify=False)
 
-            if result.text != 'success':
-                print("请求对方服务器错误{}:{}".format(str(result.text), ordercode))
+            # if result.text != 'success':
+            #     print("请求对方服务器错误{}:{}".format(str(result.text), ordercode))
 
 
 if __name__=="__main__":
