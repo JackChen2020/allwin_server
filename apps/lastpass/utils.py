@@ -5340,7 +5340,7 @@ class LastPass_GCPAYS(LastPassBase):
 
         while True:
             redisRes = self.redis_client.brpop(self.lKey)[1]
-            logger.info(redisRes,UtilTime().timestamp)
+            logger.info("{}{}".format(redisRes,UtilTime().timestamp))
             if not redisRes:
                 continue
             ordercode = redisRes.decode('utf-8').split("|")[0]
