@@ -12,6 +12,7 @@ django.setup()
 
 from django.db import transaction
 from apps.order.models import Order
+from apps.user.models import BalList
 from apps.user.models import Users
 from apps.datacount.models import OrderCount
 from libs.utils.mytime import UtilTime
@@ -25,12 +26,18 @@ def filterOrder():
 
     print("开始执行保留1个月订单操作!")
     with transaction.atomic():
-        Order.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp).delete()
+        obj = Order.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp)
+        if obj.exists():
+            for item in obj:
+                item.delete()
+
+        obj = BalList.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp).delete()
+        if obj.exists():
+            for item in obj:
+                item.delete()
     print("执行结束")
 
-
 def refresh_upd_date():
-
 
     print("开始执行刷新更新时间操作",UtilTime().today)
     for item in Users.objects.filter():
