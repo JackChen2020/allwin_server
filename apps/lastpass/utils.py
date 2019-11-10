@@ -5252,11 +5252,7 @@ class LastPass_GCPAYS(LastPassBase):
             })
 
         if res.get("code") != 0:
-            return render(requestObj, 'neichongError.html', {
-                'data': {
-                    "error": tmpres
-                }
-            })
+            return tmpres
 
         if "http" not in res.get("data"):
             return render(requestObj, 'neichongError.html', {
