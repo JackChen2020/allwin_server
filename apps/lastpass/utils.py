@@ -5189,13 +5189,25 @@ class LastPass_GCPAYS(LastPassBase):
         self.sso()
 
         if not self.data.get("bankCardNo"):
-            raise PubErrorCustom("银行卡不能为空!")
+            return render(requestObj, 'neichongError.html', {
+                'data': {
+                    "error": "银行卡不能为空"
+                }
+            })
 
         if not self.data.get("custName"):
-            raise PubErrorCustom("开户人不能为空!")
+            return render(requestObj, 'neichongError.html', {
+                'data': {
+                    "error": "开户人不能为空"
+                }
+            })
 
         if not luhn.is_valid(self.data.get("bankCardNo")):
-            raise PubErrorCustom("银行卡不合法!")
+            return render(requestObj, 'neichongError.html', {
+                'data': {
+                    "error": "银行卡不合法"
+                }
+            })
 
         try:
             orderObj = Order.objects.select_for_update().get(ordercode=self.data.get("ordercode"))
@@ -5203,8 +5215,11 @@ class LastPass_GCPAYS(LastPassBase):
             orderObj.open_name = self.data.get("custName")
             orderObj.save()
         except Order.DoesNotExist:
-            raise PubErrorCustom("拒绝访问!")
-
+            return render(requestObj, 'neichongError.html', {
+                'data': {
+                    "error": "拒绝访问"
+                }
+            })
 
         data= dict(
             orderNo = self.data.get("ordercode"),
