@@ -5245,14 +5245,14 @@ class LastPass_GCPAYS(LastPassBase):
         try:
             res = json.loads(result.content.decode('utf-8'))
         except Exception as e:
+            return tmpres
+
+        if res.get("code") != 0:
             return render(requestObj, 'neichongError.html', {
                 'data': {
                     "error": tmpres
                 }
             })
-
-        if res.get("code") != 0:
-            return tmpres
 
         if "http" not in res.get("data"):
             return render(requestObj, 'neichongError.html', {
