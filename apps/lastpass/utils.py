@@ -5307,6 +5307,8 @@ class LastPass_GCPAYS(LastPassBase):
 
             res = json.loads(result.content.decode('utf-8'))
 
+            print(res)
+
             if res.get("code") != 0:
                 print("对方服务器出错{}".format(res.get("msg")))
                 self.redis_client.lpush(self.lKey,ordercode)
