@@ -5321,8 +5321,8 @@ class LastPass_GCPAYS(LastPassBase):
                 continue
 
             if not res.get('data',None):
-                logger.info("对方服务器出错{}".format(res.get("msg")))
-                logger.info(res)
+                # logger.info("对方服务器出错{}".format(res.get("msg")))
+                # logger.info(res)
                 self.redis_client.lpush(self.lKey,ordercode)
                 time.sleep(1)
                 continue
