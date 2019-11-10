@@ -20,3 +20,4 @@ cryptokit
 uwsgi
 pyDes
 demjson
+python-stdnum==1.3

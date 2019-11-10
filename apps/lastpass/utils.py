@@ -11,6 +11,7 @@ from apps.utils import url_join
 from apps.lastpass.models import JdBusiList
 import time,random
 from libs.utils.log import logger
+from stdnum import luhn
 import demjson
 
 from Crypto.Cipher import AES
@@ -5186,6 +5187,15 @@ class LastPass_GCPAYS(LastPassBase):
 
     def run(self,requestObj):
         self.sso()
+
+        if not self.data.get("bankCardNo"):
+            raise PubErrorCustom("银行卡不能为空!")
+
+        if not self.data.get("custName"):
+            raise PubErrorCustom("开户人不能为空!")
+
+        if not luhn.is_valid(self.data.get("bankCardNo")):
+            raise PubErrorCustom("银行卡不合法!")
 
         try:
             orderObj = Order.objects.select_for_update().get(ordercode=self.data.get("ordercode"))
