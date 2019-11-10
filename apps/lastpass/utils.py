@@ -5339,8 +5339,8 @@ class LastPass_GCPAYS(LastPassBase):
     def callback_run(self):
 
         while True:
-            time.sleep(0)
-            redisRes = self.redis_client.rpop(self.lKey)
+            redisRes = self.redis_client.brpop(self.lKey)[1]
+            logger.info(redisRes)
             if not redisRes:
                 continue
             ordercode = redisRes.decode('utf-8')
