@@ -5339,6 +5339,7 @@ class LastPass_GCPAYS(LastPassBase):
     def callback_run(self):
 
         while True:
+            time.sleep(0)
             redisRes = self.redis_client.rpop(self.lKey)
             if not redisRes:
                 continue
