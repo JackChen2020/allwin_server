@@ -5240,7 +5240,7 @@ class LastPass_GCPAYS(LastPassBase):
         url= self.create_order_url + '/paid/customer/send/pay/order'
         result = request('POST', url=url,json=data, verify=False,headers={"Content-Type":'application/json',"ACCESSTOKEN": self.token})
 
-        tmpres = res.text
+        tmpres = result.text
         print(tmpres)
         res = json.loads(result.content.decode('utf-8'))
 
