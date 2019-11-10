@@ -25,9 +25,7 @@ def filterOrder():
 
     print("开始执行保留1个月订单操作!")
     with transaction.atomic():
-        orders=Order.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp)
-        for item in orders:
-            item.delete()
+        Order.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp).delete()
     print("执行结束")
 
 
