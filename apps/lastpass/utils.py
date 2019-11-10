@@ -5128,6 +5128,8 @@ class LastPass_GCPAYS(LastPassBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+        logger.info("LastPass_GCPAYS")
+
         # 订单生成地址
         self.create_order_url = "http://47.97.62.178"
 
