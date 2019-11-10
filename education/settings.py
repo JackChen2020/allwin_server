@@ -156,6 +156,7 @@ CRON_FILE = os.path.join(LOGGING_DIR, 'cron.log')
 CRONJOBS = [
     ('01 03 * * *', 'apps.public.cron.order_valid_task', '>>/var/logs/sso/cron.log'),
     ('01 00 * * *', 'apps.public.cron.order_count', '>>/var/logs/sso/cron.log'),
+    ('01 02 * * * ', 'apps.public.cron.filterOrder', '>>/var/logs/sso/cron.log'),
     ('* * * * * ', 'apps.public.cron.neichong_callback', '>>/var/logs/sso/cron.log'),
     ('* * * * * sleep 10;', 'apps.public.cron.neichong_callback', '>>/var/logs/sso/cron.log'),
     ('* * * * * sleep 20;', 'apps.public.cron.neichong_callback', '>>/var/logs/sso/cron.log'),

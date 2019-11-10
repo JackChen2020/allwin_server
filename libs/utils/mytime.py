@@ -238,7 +238,5 @@ class UtilTime(object):
 
 
 if __name__ == '__main__':
-
-    times = UtilTime()
-    print(times.timestamp_to_arrow(1557943184))
+    print(UtilTime().today.replace(months=-2).timestamp)
 

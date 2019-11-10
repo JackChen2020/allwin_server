@@ -20,6 +20,17 @@ from apps.lastpass.utils import LastPass_JINGDONG,LastPass_GCPAYS
 
 from apps.account import AccountRefreshUpdDate
 
+
+def filterOrder():
+
+    print("开始执行保留2个月订单操作!")
+    with transaction.atomic():
+        orders=Order.objects.filter(createtime__lt = UtilTime().today.replace(months=-2).timestamp)
+        for item in orders:
+            item.delete()
+    print("执行结束")
+
+
 def refresh_upd_date():
 
 
@@ -94,3 +105,5 @@ def order_count():
 
 
 
+if __name__ == '__main__':
+    filterOrder()
