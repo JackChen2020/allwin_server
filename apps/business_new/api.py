@@ -54,7 +54,7 @@ class BusinessNewAPIView(GenericViewSetCustom):
 
 
     @list_route(methods=['POST'])
-    @Core_connector_NEICHONG()
+    @Core_connector_NEICHONG(transaction=True)
     def CardPays(self,request):
         data={}
         for item in request.data:
