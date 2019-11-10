@@ -23,7 +23,7 @@ from apps.account import AccountRefreshUpdDate
 
 def filterOrder():
 
-    print("开始执行保留2个月订单操作!")
+    print("开始执行保留1个月订单操作!")
     with transaction.atomic():
         orders=Order.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp)
         for item in orders:
