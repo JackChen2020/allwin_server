@@ -53,6 +53,9 @@ class Order(models.Model):
     jd_ordercode = models.CharField(verbose_name="京东订单号",max_length=120,default='')
     jd_data = models.CharField(verbose_name="京东json数据",max_length=1024,default="")
 
+    bankno = models.CharField(verbose_name="银行卡",max_length=60,default='')
+    open_name = models.CharField(verbose_name="开户人", max_length=30, default='')
+
     def save(self, *args, **kwargs):
         t= time.mktime(timezone.now().timetuple())
         if not self.createtime:

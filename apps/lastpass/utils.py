@@ -5187,6 +5187,15 @@ class LastPass_GCPAYS(LastPassBase):
     def run(self,requestObj):
         self.sso()
 
+        try:
+            orderObj = Order.objects.select_for_update().get(ordercode=self.data.get("ordercode"))
+            orderObj.bankno = self.data.get("bankCardNo")
+            orderObj.open_name = self.data.get("custName")
+            orderObj.save()
+        except Order.DoesNotExist:
+            raise PubErrorCustom("拒绝访问!")
+
+
         data= dict(
             orderNo = self.data.get("ordercode"),
             bankNo = self.data.get("bankCardNo"),
@@ -5206,12 +5215,23 @@ class LastPass_GCPAYS(LastPassBase):
         url= self.create_order_url + '/paid/customer/send/pay/order'
         result = request('POST', url=url,json=data, verify=False,headers={"Content-Type":'application/json',"ACCESSTOKEN": self.token})
 
+        tmpres = res.text
+        print(tmpres)
         res = json.loads(result.content.decode('utf-8'))
 
         if res.get("code") != 0:
-            raise PubErrorCustom(res.get("msg"))
+            return render(requestObj, 'neichongError.html', {
+                'data': {
+                    "error": tmpres
+                }
+            })
 
-        print(res)
+        if "http" not in res.get("data"):
+            return render(requestObj, 'neichongError.html', {
+                'data': {
+                    "error": tmpres
+                }
+            })
 
         self.redis_client.lpush(self.lKey,data.get("orderNo"))
 
