@@ -31,7 +31,7 @@ def filterOrder():
             for item in obj:
                 item.delete()
 
-        obj = BalList.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp).delete()
+        obj = BalList.objects.filter(createtime__lt = UtilTime().today.replace(months=-1).timestamp)
         if obj.exists():
             for item in obj:
                 item.delete()
