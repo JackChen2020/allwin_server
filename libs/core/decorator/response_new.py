@@ -244,7 +244,7 @@ class Core_connector_NEICHONG:
                 return response
             except PubErrorCustom as e:
                 logger.error('[%s : %s  ] : [%s]'%(outside_self.__class__.__name__, getattr(func, '__name__'),e.msg))
-                return response
+                return HttpResponse(success=False, msg=e.msg, data=None)
             except InnerErrorCustom as e:
                 logger.error('[%s : %s  ] : [%s]'%(outside_self.__class__.__name__, getattr(func, '__name__'),e.msg))
                 return HttpResponse(success=False, msg=e.msg, rescode=e.code, data=None)
