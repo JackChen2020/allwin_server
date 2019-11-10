@@ -47,10 +47,8 @@
         <p class="fr txt_over"><span class="order_msg">订单号：{{data.ordercode}}</span></p>
     </div>
 
-
-
     <form action="{{data.url}}" method="post" onsubmit="return check()">
-        <div class="blue_tab">
+        <div class="blue_tab" >
             <div class="tab_content">
                 <div class="content_main" id="content-div-id">
                     <div class="list" id="content-list">
@@ -93,7 +91,7 @@
             </div>
             <div class="blue_title">
                 <div class="ct_bg clearfix">
-                    <div class="pay_tab"><span class="tab_txt">银联卡支付</span></div>
+                    <div class="pay_tab"><span class="tab_txt">银联卡付款</span></div>
                     <i class="tab_sep"></i>
 
                     <i class="tab_sep"></i>
@@ -101,63 +99,10 @@
             </div>
         </div>
     </form>
-
-
 </div>
 
-
-
-</div>
 </body>
 <script>
-
-    (function() {
-      window.onload = window.onresize = () => {
-        let clientWidth = document.body.clientWidth;
-        // console.log(clientWidth,'clientWidth');
-        if (clientWidth >= 750) {
-          /* 适配pc页面 最小适配分辨率 12/(20/1920) = 1152 */
-          var size = 20 * clientWidth / 1920 + 'px';
-          document.documentElement.style.fontSize = size;
-        } else {
-          /* 淘宝移动端适配解决方案 */
-          (function flexible(window, document) {
-            var docEl = document.documentElement;
-            var dpr = window.devicePixelRatio || 1;
-            function setBodyFontSize() {
-              if (document.body) {
-                document.body.style.fontSize = (12 * dpr) + 'px';
-              } else {
-                document.addEventListener('DOMContentLoaded', setBodyFontSize);
-              }
-            }
-            setBodyFontSize();
-            function setRemUnit() {
-              var rem = docEl.clientWidth / 10;
-              docEl.style.fontSize = rem + 'px';
-            }
-            setRemUnit();
-            window.addEventListener('resize', setRemUnit);
-            window.addEventListener('pageshow', function(e) {
-              if (e.persisted) {
-                setRemUnit();
-              }
-            });
-            if (dpr >= 2) {
-              var fakeBody = document.createElement('body');
-              var testElement = document.createElement('div');
-              testElement.style.border = '.5px solid transparent';
-              fakeBody.appendChild(testElement);
-              docEl.appendChild(fakeBody);
-              if (testElement.offsetHeight === 1) {
-                docEl.classList.add('hairlines');
-              }
-              docEl.removeChild(fakeBody);
-            }
-          }(window, document));
-        }
-      };
-    })();
 
 </script>
 </html>
