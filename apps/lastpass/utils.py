@@ -5207,6 +5207,8 @@ class LastPass_GCPAYS(LastPassBase):
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
+        print(res)
+
         self.redis_client.lpush(self.lKey,data.get("orderNo"))
 
         return render(requestObj, 'neichongGo.html', {
