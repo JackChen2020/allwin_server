@@ -5166,7 +5166,7 @@ class LastPass_GCPAYS(LastPassBase):
 
         return json.loads(result.content.decode('utf-8'))
 
-    def sso(self):
+    def sso(self,isFlag=False):
 
         if not self.token:
             res = self.getToken()
@@ -5182,7 +5182,10 @@ class LastPass_GCPAYS(LastPassBase):
             })
             res = json.loads(result.content.decode('utf-8'))
             if res.get("code") != 0:
-                raise PubErrorCustom("鉴权失败：{}".format(res.get("msg")))
+                if isFlag:
+                    return False
+                else:
+                    raise PubErrorCustom("鉴权失败：{}".format(res.get("msg")))
 
 
     def run(self,requestObj):
@@ -5364,6 +5367,13 @@ class LastPass_GCPAYS(LastPassBase):
                              headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
             res = json.loads(result.content.decode('utf-8'))
+
+            if res.get("code") == 50002:
+                self.token=None
+                if not self.sso(isFlag=True):
+                    self.redis_client.lpush(self.lKey, "{}|{}".format(ordercode, endtime))
+                    time.sleep(1)
+                    continue
 
             if res.get("code") != 0:
                 logger.info("对方服务器出错{}".format(res.get("msg")))
