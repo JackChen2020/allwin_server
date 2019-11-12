@@ -5370,10 +5370,7 @@ class LastPass_GCPAYS(LastPassBase):
 
             if res.get("code") == 50002:
                 self.token=None
-                if not self.sso(isFlag=True):
-                    self.redis_client.lpush(self.lKey, "{}|{}".format(ordercode, endtime))
-                    time.sleep(1)
-                    continue
+                self.sso()
 
             if res.get("code") != 0:
                 logger.info("对方服务器出错{}".format(res.get("msg")))
