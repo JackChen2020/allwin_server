@@ -13,10 +13,12 @@ import hashlib
 from apps.utils import upd_bal
 from libs.utils.mytime import UtilTime
 
-from apps.lastpass.utils import LastPass_BAWANGKUAIJIE
+from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE,LastPass_GCPAYS
 from libs.utils.string_extension import hexStringTobytes
 from apps.cache.utils import RedisCaCheHandler
 from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApiFee
+
+from apps.pay.models import PayPassLinkType
 
 
 
@@ -25,17 +27,8 @@ class dfHandler(object):
 
     def __init__(self,data,ip=None,islock=False,isip=True):
 
-        print("ip:",ip)
-
-        self.dfClass = LastPass_BAWANGKUAIJIE(data={})
 
         self.data = data
-
-        #代付手续费
-        self.fee = 3.0
-
-        #T0提现 90%
-        self.t0Tx = 0.9
 
         if islock:
             try:
@@ -48,6 +41,18 @@ class dfHandler(object):
             except Users.DoesNotExist:
                 raise PubErrorCustom("无效的商户!")
 
+
+        paypass = self.get_paypasslinktype()
+
+        if not len(paypass):
+            raise PubErrorCustom("通道暂未开放!")
+        if len(paypass) > 1:
+            raise PubErrorCustom("代付通道不允许设置多通道!")
+
+        self.paypasslinktype = paypass[0]
+
+        #T0提现 90%
+        self.t0Tx = 0.8
 
         if isip:
             data =RedisCaCheHandler(
@@ -73,16 +78,33 @@ class dfHandler(object):
             if not isIpValid:
                 raise PubErrorCustom("拒绝访问!")
 
+    def get_paypasslinktype(self):
+        paypass = PayPassLinkType.objects.raw(
+            """
+            SELECT t1.*,t2.typename ,t2.name as paytypename,t3.name as paypassname FROM paypasslinktype as t1 
+            INNER JOIN paytype as t2 on t1.paytypeid = t2.paytypeid
+            INNER JOIN paypass as t3 on t1.passid = t3.paypassid
+            WHERE t1.to_id=%s and t1.type='1' 
+            """, [self.user.userid]
+        )
+        paypass = list(paypass)
+        return paypass
+
     def get_ok_bal(self):
-        weeknum = UtilTime().get_week_day()
 
-        if weeknum in [6,7]:
-            ok_bal = float(self.user.today_pay_amount) * self.t0Tx - (float(self.user.today_cashout_amount) + float(self.user.today_fee_amount))
+
+        if self.paypasslinktype.passid in ['51','54']:
+            weeknum = UtilTime().get_week_day()
+
+            if weeknum in [6,7]:
+                ok_bal = float(self.user.today_pay_amount) * self.t0Tx - (float(self.user.today_cashout_amount) + float(self.user.today_fee_amount))
+            else:
+                ok_bal = float(self.user.lastday_bal) + (float(self.user.today_pay_amount) * self.t0Tx - (float(self.user.today_cashout_amount) + float(self.user.today_fee_amount)))
+
+            print("用户ID{} 周几{} 昨日余额{} 当填充值金额{} 当天提现金额{} 当天手续费{}".format(self.user.userid, weeknum, self.user.lastday_bal,
+                                                                self.user.today_pay_amount, self.user.today_cashout_amount,self.user.today_fee_amount ))
         else:
-            ok_bal = float(self.user.lastday_bal) + (float(self.user.today_pay_amount) * self.t0Tx - (float(self.user.today_cashout_amount) + float(self.user.today_fee_amount)))
-
-        print("用户ID{} 周几{} 昨日余额{} 当填充值金额{} 当天提现金额{} 当天手续费{}".format(self.user.userid, weeknum, self.user.lastday_bal,
-                                                            self.user.today_pay_amount, self.user.today_cashout_amount,self.user.today_fee_amount ))
+            ok_bal = self.user.bal
 
         return ok_bal
 
@@ -152,19 +174,12 @@ class dfHandler(object):
         if sign != self.data.get("sign"):
             raise PubErrorCustom("验签失败!")
 
+        request={}
+        # request['dfordercode'] = "DF%08d%s" % (self.user.userid,self.data.get("down_ordercode"))
+        request['dfordercode'] = self.data.get("down_ordercode")
+        request['userid'] =  self.user.userid
 
-        self.dfClass.data['orderId'] = "DF%08d%s" % (self.user.userid,self.data.get("down_ordercode"))
-
-        res = self.dfClass.df_query()
-
-        print(res)
-
-        return {"data":{
-            "subcode" : res['REP_BODY']['subcode'],
-            "submsg" : hexStringTobytes(res['REP_BODY']['submsg']).decode('utf-8') if 'submsg' in res['REP_BODY'] else '',
-            "orderId": res['REP_BODY']['orderId'][10:] if 'orderId' in res['REP_BODY'] else '',
-            "tranId": res['REP_BODY']['tranId'] if 'tranId' in res['REP_BODY'] else '',
-        }}
+        return daifuOrderQuery(request)
 
     def check_params(self):
         if not self.data.get("businessid"):
@@ -211,44 +226,23 @@ class dfHandler(object):
     def handler(self):
 
         ok_bal = self.get_ok_bal()
-        if float(ok_bal) - abs(float(self.user.cashout_bal)) - self.fee < float(self.data.get("amount")):
+        if float(ok_bal) - abs(float(self.user.cashout_bal)) - float(self.user.fee_rule) < float(self.data.get("amount")):
             raise PubErrorCustom("可提余额不足!")
 
-        # self.user.cashout_bal = float(self.user.cashout_bal) + float(self.data.get("amount")) + self.fee
 
-        cashlist = CashoutList.objects.create(**{
-            "userid": self.user.userid,
-            "name": self.user.name,
-            "amount": float(self.data.get("amount")),
-            "bank_name": hexStringTobytes(self.data.get("bankName")).decode('utf-8'),
-            "open_name": hexStringTobytes(self.data.get("accountName")).decode('utf-8'),
-            "bank_card_number": self.data.get("accountNo"),
-            "status": "0",
-            "downordercode" : self.data.get('down_ordercode'),
+        request=dict()
 
-        })
+        request["paypassid"] = self.paypasslinktype.passid
+        request["amount"] = float(self.data.get("amount"))
+        request["bank_name"] = hexStringTobytes(self.data.get("bankName")).decode('utf-8')
+        request["open_name"] = hexStringTobytes(self.data.get("accountName")).decode('utf-8')
+        request["bank_card_number"] = self.data.get("accountNo")
+        request["downordercode"] = self.data.get('down_ordercode')
 
-        AccountCashoutConfirmForApi(user=self.user,amount=cashlist.amount).run()
-
+        AccountCashoutConfirmForApi(user=self.user,amount=request["amount"]).run()
         AccountCashoutConfirmForApiFee(user=self.user).run()
 
-        self.dfClass.data['orderId'] = "DF%08d%s" % (cashlist.userid,cashlist.downordercode)
-        self.dfClass.data['txnAmt'] = str(int(float(cashlist.amount) * 100.0))
-        self.dfClass.data['accountNo'] = cashlist.bank_card_number
-        self.dfClass.data['bankName'] = cashlist.bank_name
-        self.dfClass.data['accountName'] = cashlist.open_name
-
-        res = self.dfClass.df_bal_handler()
-
-        cashlist.status = '1'
-        cashlist.paypassid  = '54'
-        cashlist.tranid = res['REP_BODY']['tranId']
-        cashlist.save()
-
-        # upd_bal(user=self.user,cashout_bal = cashlist.amount*-1,bal=cashlist.amount*-1,memo="Api代付")
-
-
-
+        daifuBalTixian(request,user)
 
         return None
 
@@ -258,3 +252,133 @@ class dfHandler(object):
 
         self.check_params()
         self.handler()
+
+
+#代付订单查询
+def daifuOrderQuery(request):
+
+    try:
+        obj = CashoutList.objects.get(id= request.get("id"))
+    except CashoutList.DoesNotExist:
+        raise PubErrorCustom("此订单不存在!")
+
+    obj = CashoutList.objects.filter(userid=request.get("userid"),downordercode=request.get("down_ordercode"))
+
+    if not obj.exists():
+        raise PubErrorCustom("此订单不存在!")
+
+    obj = obj[0]
+    dfordercode = "DF%08d%s" % (request.get("userid"), request.get("down_ordercode"))
+
+    print(request)
+
+    if str(request.get('paypassid')) == '54':
+        res = LastPass_BAWANGKUAIJIE(data={
+            "orderId" : dfordercode
+        }).df_query()
+        obj.textstatus = res
+        obj.save()
+        return {"data":{"msg":res}}
+
+    elif str(request.get('paypassid')) == '51':
+        res=LastPass_KUAIJIE(data={
+            "tradeCustorder" : dfordercode
+        }).df_order_query()
+        obj.textstatus = res
+        obj.save()
+        return {"data":{"msg":res}}
+    elif str(request.get('paypassid')) == '69':
+        res=LastPass_GCPAYS().df_order_query(data={
+            "orderNo" : dfordercode
+        })
+        obj.textstatus = res
+        obj.save()
+        return {"data":{"msg":res}}
+
+#代付提现
+def daifuBalTixian(request,user):
+
+    if str(request.get('paypassid')) == '54':
+
+        cashlist = CashoutList.objects.create(**{
+            "userid": user.userid,
+            "name": user.name,
+            "amount": request.get("amount"),
+            "bank_name": request['bank_name'],
+            "open_name": request['open_name'],
+            "bank_card_number": request.get("bank")['bank_card_number'],
+            "status": "0",
+            "downordercode"  : request['downordercode']
+        })
+
+        res = LastPass_BAWANGKUAIJIE(data={
+            "orderId": "DF%08d%s" % (cashlist.userid, cashlist.downordercode),
+            "txnAmt" : str(int(float(cashlist.amount)*100.0)),
+            "accountNo" : cashlist.bank_card_number,
+            "bankName" :cashlist.bank_name,
+            "accountName" : cashlist.open_name
+        }).df_bal_handler()
+
+        cashlist.status='1'
+        cashlist.paypassid = '54'
+        cashlist.tranid = res['REP_BODY']['tranId']
+        cashlist.save()
+
+        return None
+    elif str(request.get('paypassid')) == '51':
+
+        cashlist = CashoutList.objects.create(**{
+            "userid": user.userid,
+            "name": user.name,
+            "amount": request.get("amount"),
+            "bank_name": request.get['bank_name'],
+            "open_name": request.get['open_name'],
+            "bank_card_number": request.get("bank")['bank_card_number'],
+            "status": "0",
+            "downordercode": request['downordercode']
+        })
+        res = LastPass_KUAIJIE().df_api(data={
+            "orderId": "DF%08d%s" % (cashlist.userid, cashlist.downordercode),
+            "txnAmt": "%.2lf"%float(cashlist.amount),
+            "accountNo": cashlist.bank_card_number,
+            "bankName": cashlist.bank_name,
+            "accountName": cashlist.open_name
+        })
+
+        cashlist.status = '1'
+        cashlist.paypassid = '51'
+        cashlist.tranid = cashlist.downordercode
+        cashlist.save()
+
+        return None
+    elif str(request.get('paypassid')) == '69':
+
+        cashlist = CashoutList.objects.create(**{
+            "userid": user.userid,
+            "name": user.name,
+            "amount": request.get("amount"),
+            "bank_name": request.get("bank")['bank_name'],
+            "open_name": request.get("bank")['open_name'],
+            "bank_card_number": request.get("bank")['bank_card_number'],
+            "status": "0",
+            "downordercode": request['downordercode']
+        })
+
+        res = LastPass_GCPAYS().df_api(data={
+            "orderNo": "DF%08d%s" % (cashlist.userid, cashlist.downordercode),
+            "bankNo": cashlist.bank_card_number,
+            "timestap" : str(cashlist.createtime),
+            "realName": cashlist.open_name,
+            "branchBankName" : cashlist.open_bank,
+            "money": int(float(cashlist.amount)*100.0),
+            "bankName": cashlist.bank_name
+        })
+
+        cashlist.status = '1'
+        cashlist.paypassid = '69'
+        cashlist.tranid = cashlist.downordercode
+        cashlist.save()
+
+        return None
+    else:
+        raise PubErrorCustom("代付渠道有误!")
