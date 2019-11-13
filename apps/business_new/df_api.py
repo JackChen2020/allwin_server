@@ -5,6 +5,8 @@ from utils.exceptions import PubErrorCustom
 
 from apps.order.models import CashoutList
 
+import time
+
 from libs.utils.string_extension import hexStringTobytes
 
 from utils.log import logger
@@ -20,6 +22,8 @@ from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApi
 
 from apps.pay.models import PayPassLinkType
 
+
+from apps.utils import RedisHandler
 
 
 class dfHandler(object):
@@ -239,11 +243,10 @@ class dfHandler(object):
         request["bank_card_number"] = self.data.get("accountNo")
         request["downordercode"] = self.data.get('down_ordercode')
 
-        AccountCashoutConfirmForApi(user=self.user,amount=request["amount"]).run()
-        AccountCashoutConfirmForApiFee(user=self.user).run()
-
         daifuBalTixian(request,self.user)
 
+        daifu = daifuCallBack()
+        daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}".format(self.user.userid, request["amount"], request["downordercode"], self.paypasslinktype.passid, UtilTime().today.replace(minutes=30).timestamp))
         return None
 
 
@@ -254,13 +257,60 @@ class dfHandler(object):
         self.handler()
 
 
+class daifuCallBack(object):
+    def __init__(self):
+
+        self.lKey = "DAIFU_ORDERS"
+
+        self.redis_client = RedisHandler(key=self.lKey,db="default").redis_client
+
+    def run(self):
+        while True:
+
+            redisRes = self.redis_client.brpop(self.lKey)[1]
+            # logger.info("{}{}".format(redisRes,UtilTime().timestamp))
+            if not redisRes:
+                continue
+
+            userid = redisRes.decode('utf-8').split("|")[0]
+            amount = redisRes.decode('utf-8').split("|")[1]
+            ordercode = redisRes.decode('utf-8').split("|")[2]
+            paypassid = redisRes.decode('utf-8').split("|")[3]
+            endtime = redisRes.decode('utf-8').split("|")[4]
+
+            if UtilTime().timestamp >= int(endtime):
+                continue
+            try:
+                res = daifuOrderQuery(request={
+                    "userid": userid,
+                    "down_ordercode": ordercode,
+                    "paypassid": paypassid
+                })
+            except PubErrorCustom as e:
+                logger.info(str(e.msg))
+                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                time.sleep(1)
+                continue
+            except Exception as e:
+                logger.info(str(e))
+                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                time.sleep(1)
+                continue
+
+            if "成功" not in res.get("data").get("msg") :
+                logger.info(res)
+                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                time.sleep(1)
+                continue
+
+            user = Users.objects.select_for_update().get(userid=userid)
+
+            AccountCashoutConfirmForApi(user=user, amount=float(amount)).run()
+            AccountCashoutConfirmForApiFee(user=user).run()
+
+
 #代付订单查询
 def daifuOrderQuery(request):
-
-    try:
-        obj = CashoutList.objects.get(id= request.get("id"))
-    except CashoutList.DoesNotExist:
-        raise PubErrorCustom("此订单不存在!")
 
     obj = CashoutList.objects.filter(userid=request.get("userid"),downordercode=request.get("down_ordercode"))
 
