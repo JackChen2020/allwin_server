@@ -3511,31 +3511,6 @@ class LastPass_KUAIJIE(LastPassBase):
         return k.decrypt(content).decode('utf-8')
 
 
-    def df_return_content(self):
-
-
-        cardno = "6226621704181682"
-        name = "陈丽红"
-        bankname = "中国光大银行"
-        type = "私"
-        amount = 50.0
-        bizhong = 'CNY'
-        ordercode = "DF00000001"
-        remark = "备注"
-
-        content = "{},{},{},{},{},{},{},{},{}".format(
-            cardno,
-            name,
-            bankname,
-            type,
-            amount,
-            bizhong,
-            '',
-            ordercode,
-            remark
-        )
-        return self.encrypt(content.encode('utf-8'),self.secret[:8])
-
     def df_bal_query(self):
 
         encrypted = ("customerNo={}{}".format(self.businessId,self.secret)).encode("utf-8")
@@ -3558,7 +3533,7 @@ class LastPass_KUAIJIE(LastPassBase):
         self.data.setdefault("customerNo",self.businessId)
         self.data.setdefault("inputCharset","UTF-8")
         self.data.setdefault("payVersion",'00')
-        self.data.setdefault("tradeCustorder","DF00000002")
+        # self.data.setdefault("tradeCustorder","DF00000002")
         self.data.setdefault("payDate",UtilTime().arrow_to_string(format_v="YYYYMMDD"))
         self._sign()
         self.data.setdefault('signType',"MD5")
@@ -3581,32 +3556,55 @@ class LastPass_KUAIJIE(LastPassBase):
         if sign != self.data.get('sign'):
             raise PubErrorCustom("签名错误!")
 
-        return res
+        if res['tradeStatus'] == 'succ':
+            return "代付成功"
+        else:
+            return unquote(res['tradeReason'], 'utf-8')
 
         # if res['status'] != 'succ':
         #     raise PubErrorCustom(res['errMsg'])
         #
         # return res['errMsg']
+    def df_return_content(self,data):
 
-    def df_api(self):
+
+        cardno = data['accountNo']
+        name = data['accountName']
+        bankname = data['bankName']
+        type = "私"
+        amount = data['txnAmt']
+        bizhong = 'CNY'
+        ordercode = data['orderId']
+        remark = "备注"
+
+        content = "{},{},{},{},{},{},{},{},{}".format(
+            cardno,
+            name,
+            bankname,
+            type,
+            amount,
+            bizhong,
+            '',
+            ordercode,
+            remark
+        )
+        return self.encrypt(content.encode('utf-8'),self.secret[:8])
+
+    def df_api(self,data):
+
         self.data.setdefault('customerNo', self.businessId)
         self.data.setdefault('inputCharset', "utf8")
         self.data.setdefault('payDate', UtilTime().arrow_to_string(format_v="YYYYMMDD"))
         self.data.setdefault('inputCharset', "00")
 
-        self.data.setdefault('content',self.df_return_content())
+        self.data.setdefault('content',self.df_return_content(data))
         self.data.setdefault('payVersion',"00")
 
         self._sign()
 
         self.data.setdefault('signType', "MD5")
 
-        self._request_df()
-
-        if self.response['status'] !='succ':
-            raise PubErrorCustom(self.response['errMsg'])
-
-        return self.response
+        return self._request_df()
 
 class LastPass_ALLWIN(LastPassBase):
     def __init__(self,**kwargs):
@@ -5335,11 +5333,11 @@ class LastPass_GCPAYS(LastPassBase):
             raise PubErrorCustom("支付失败!")
 
         if str(res.get("data").get("payStatus")) == '0':
-            return "支付中"
+            return (0,"支付中")
         elif str(res.get("data").get("payStatus")) == '1':
-            return "支付成功"
+            return (1,"支付成功")
         else:
-            return "支付失败"
+            return (2,"支付失败")
 
     def df_bal_query(self):
         self.sso()
