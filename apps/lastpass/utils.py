@@ -5272,25 +5272,29 @@ class LastPass_GCPAYS(LastPassBase):
             }
         })
 
-    def df(self,data):
-        url = self.create_order_url + '/paid//customer/send/order'
+    def df_api(self,data):
+
+        self.sso()
+        url = self.create_order_url + '/paid/customer/send/order'
 
         data['sign'] = md5pass("{}{}{}{}{}{}".format(
             str(self.appId),
             str(data['orderNo']),
             str(data['timestap']),
-            str(data['payAmt']),
+            str(data['money']),
             str(data['bankNo']),
             str(self.keyStore),
         ))
 
-        self.sso()
-
-        print(data)
+        print(json.dumps(data))
+        print(url)
+        print(self.token)
         result = request('POST', url=url, json=data, verify=False,
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
         res = json.loads(result.content.decode('utf-8'))
+
+        print(res)
 
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
@@ -5304,30 +5308,33 @@ class LastPass_GCPAYS(LastPassBase):
             str(self.keyStore),
         ))
 
-        url = self.create_order_url + '/paid/query/in/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
+        url = self.create_order_url + '/paid/query/out/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
 
         print(data)
-        result = request('POST', url=url, json=data, verify=False,
+        print(url)
+        result = request('POST', url=url, verify=False,
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
         res = json.loads(result.content.decode('utf-8'))
+        print(res)
+        print(self.token)
 
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
         if not res.get("data",None):
-            raise PubErrorCustom("充值失败!")
+            raise PubErrorCustom("支付失败!")
 
         if str(res.get("data").get("payStatus")) == '0':
-            return "充值中"
+            return "支付中"
         elif str(res.get("data").get("payStatus")) == '1':
-            return "充值成功"
+            return "支付成功"
         else:
-            return "充值失败"
+            return "支付失败"
 
     def df_bal_query(self):
         self.sso()
-        url = self.create_order_url + '/web/query/customer'
+        url = self.create_order_url + '/paid/query/customer/info'
 
         result = request('POST', url=url, verify=False,
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
@@ -5337,7 +5344,7 @@ class LastPass_GCPAYS(LastPassBase):
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
-        return float(res.get("data").get("customerAmt"))
+        return res.get("data")
 
     def callback_run(self):
 
