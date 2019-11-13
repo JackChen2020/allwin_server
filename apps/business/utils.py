@@ -1040,9 +1040,9 @@ class CreateOrder(object):
         elif str(self.paypasslinktype.passid)  in ['66','67']:
 
             if str(self.paypasslinktype.passid)=='66':
-                pay_bankcode = "8019"
+                pay_bankcode = "8007"
             else:
-                pay_bankcode = "923"
+                pay_bankcode = "8003"
             request_data = {
                 "pay_orderid": str(self.order.ordercode),
                 "pay_amount": self.order.amount,
