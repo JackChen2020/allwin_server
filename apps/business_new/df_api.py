@@ -245,8 +245,11 @@ class dfHandler(object):
 
         daifuBalTixian(request,self.user)
 
-        daifu = daifuCallBack()
-        daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}".format(self.user.userid, request["amount"], request["downordercode"], self.paypasslinktype.passid, UtilTime().today.replace(minutes=30).timestamp))
+        AccountCashoutConfirmForApi(user=self.user, amount=request["amount"]).run()
+        AccountCashoutConfirmForApiFee(user=self.user).run()
+
+        # daifu = daifuCallBack()
+        # daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}".format(self.user.userid, request["amount"], request["downordercode"], self.paypasslinktype.passid, UtilTime().today.replace(minutes=30).timestamp))
         return None
 
 

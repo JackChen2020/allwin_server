@@ -38,10 +38,10 @@ class LastPassBase(object):
 class TestDf(object):
 
     def __init__(self):
-        self.secret = "XMXITYSK6DEKCTPT"
+        self.secret = "4S4G7CBWJHYAD5ZE"
 
         self.data={
-            "businessid" : "169"
+            "businessid" : "5"
         }
 
     def _request(self,url):
@@ -116,4 +116,4 @@ class TestDf(object):
 if __name__ == '__main__':
 
     testDfClass = TestDf()
-    print(testDfClass.dfQuery())
+    print(testDfClass.BalQuery())
