@@ -116,4 +116,4 @@ class TestDf(object):
 if __name__ == '__main__':
 
     testDfClass = TestDf()
-    print(testDfClass.BalQuery())
+    print(testDfClass.df())

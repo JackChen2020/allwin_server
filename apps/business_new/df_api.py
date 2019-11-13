@@ -357,9 +357,9 @@ def daifuBalTixian(request,user):
             "userid": user.userid,
             "name": user.name,
             "amount": request.get("amount"),
-            "bank_name": request['bank_name'],
-            "open_name": request['open_name'],
-            "bank_card_number": request.get("bank")['bank_card_number'],
+            "bank_name": request('bank_name'),
+            "open_name": request('open_name'),
+            "bank_card_number": request.get('bank_card_number'),
             "status": "0",
             "downordercode"  : request['downordercode']
         })
@@ -384,9 +384,9 @@ def daifuBalTixian(request,user):
             "userid": user.userid,
             "name": user.name,
             "amount": request.get("amount"),
-            "bank_name": request.get['bank_name'],
-            "open_name": request.get['open_name'],
-            "bank_card_number": request.get("bank")['bank_card_number'],
+            "bank_name": request.get('bank_name'),
+            "open_name": request.get('open_name'),
+            "bank_card_number": request.get('bank_card_number'),
             "status": "0",
             "downordercode": request['downordercode']
         })
@@ -411,9 +411,9 @@ def daifuBalTixian(request,user):
             "userid": user.userid,
             "name": user.name,
             "amount": request.get("amount"),
-            "bank_name": request.get['bank_name'],
-            "open_name": request.get['open_name'],
-            "bank_card_number": request.get['bank_card_number'],
+            "bank_name": request.get('bank_name'),
+            "open_name": request.get('open_name'),
+            "bank_card_number": request.get('bank_card_number'),
             "status": "0",
             "downordercode": request['downordercode']
         })
