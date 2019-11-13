@@ -315,14 +315,14 @@ class daifuCallBack(object):
 #代付订单查询
 def daifuOrderQuery(request):
 
-    print(request.get("userid"),request.get("down_ordercode"))
-    obj = CashoutList.objects.filter(userid=request.get("userid"),downordercode=request.get("down_ordercode"))
+    print(request.get("userid"),request.get("dfordercode"))
+    obj = CashoutList.objects.filter(userid=request.get("userid"),downordercode=request.get("dfordercode"))
 
     if not obj.exists():
         raise PubErrorCustom("此订单不存在!")
 
     obj = obj[0]
-    dfordercode = "DF%08d%s" % (request.get("userid"), request.get("down_ordercode"))
+    dfordercode = "DF%08d%s" % (request.get("userid"), request.get("dfordercode"))
 
     print(request)
 
