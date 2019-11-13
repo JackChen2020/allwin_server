@@ -337,6 +337,7 @@ def daifuBalTixian(request,user):
             "status": "0",
             "downordercode": request['downordercode']
         })
+
         res = LastPass_KUAIJIE().df_api(data={
             "orderId": "DF%08d%s" % (cashlist.userid, cashlist.downordercode),
             "txnAmt": "%.2lf"%float(cashlist.amount),
@@ -357,9 +358,9 @@ def daifuBalTixian(request,user):
             "userid": user.userid,
             "name": user.name,
             "amount": request.get("amount"),
-            "bank_name": request.get("bank")['bank_name'],
-            "open_name": request.get("bank")['open_name'],
-            "bank_card_number": request.get("bank")['bank_card_number'],
+            "bank_name": request.get['bank_name'],
+            "open_name": request.get['open_name'],
+            "bank_card_number": request.get['bank_card_number'],
             "status": "0",
             "downordercode": request['downordercode']
         })
