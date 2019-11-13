@@ -1043,19 +1043,19 @@ class CreateOrder(object):
                 pay_bankcode = "8007"
             else:
                 pay_bankcode = "8003"
+
             request_data = {
-                "pay_orderid": str(self.order.ordercode),
-                "pay_amount": self.order.amount,
-                "pay_notifyurl": url_join('/callback_api/lastpass/juxingnew_callback'),
-                "pay_bankcode": pay_bankcode
+                "amount": int(float(self.order.amount) * float(100.0)),
+                "mchOrderNo": str(self.order.ordercode),
+                "notifyUrl": url_join('/callback_api/lastpass/juxingnew_callback'),
+                "productId" : pay_bankcode
             }
+
             res = LastPass_JUXINGNEW(data=request_data).run()
             if not res[0]:
-                raise PubErrorCustom("生成订单失败,请稍后再试!")
+                raise PubErrorCustom(res[1])
 
-            with open('/var/html/dada/{}.html'.format(self.order.ordercode), 'w') as f1:
-                f1.write(res[1])
-            return {"path": url_join('/dada/{}.html').format(self.order.ordercode)}
+            return {"path": res[1]}
 
         elif str(self.paypasslinktype.passid)  == '68':
 

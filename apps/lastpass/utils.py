@@ -4953,9 +4953,10 @@ class LastPass_JUXINGNEW(LastPassBase):
 
 
         #生产环境
-        self.create_order_url="http://t01.jpttym.com/Pay_Index.html"
-        self.secret = "wpw35kn5u2jdtu4fgo7pakuxyyiqoguo"
-        self.businessId = "180778747"
+        self.create_order_url="http://1.32.200.11:3020/api/pay/create_order"
+        self.secret = "RQSSRGEUBGPPGZ414KEFISF3FU8FIKLB6XT7WDMCYUQFRP2WHJD0GJP7PRYW0QHEBDQZ9V8ZZ0X25VEUSYAJWBBH5QTNVMXRPZHWODHNBHBWXYUAYRHLXKISUYQA81S9"
+        self.businessId = "20000001"
+        self.appId = "fede1f578220403680fc97bc704cbf65"
 
         self.response = None
 
@@ -4980,7 +4981,8 @@ class LastPass_JUXINGNEW(LastPassBase):
         for item in valid_orders_data:
             encrypted += "{}={}&".format(item, valid_orders_data[item])
         encrypted = encrypted[:-1].encode("utf-8")
-        self.data['pay_md5sign'] = hashlib.md5(encrypted).hexdigest().upper()
+        print(encrypted)
+        self.data['sign'] = hashlib.md5(encrypted).hexdigest().upper()
 
     def check_sign(self):
         sign = self.data.pop('sign',False)
@@ -5000,16 +5002,23 @@ class LastPass_JUXINGNEW(LastPassBase):
         self.response = result.text
 
     def run(self):
-        self.data.setdefault('pay_memberid',self.businessId)
-        self.data.setdefault('pay_applydate',self.obtaindate())
-        self.data.setdefault('pay_callbackurl',url_join("/pay/#/juli"))
-        self._sign()
+        self.data.setdefault('mchId',self.businessId)
+        self.data.setdefault('appId',self.appId)
 
-        self.data.setdefault('pay_productname',"商品")
+
+        self.data.setdefault('currency','cny')
+
+        # self.data.setdefault('productId', self.productId)
+        self.data.setdefault('subject','商品P')
+        self.data.setdefault('body', '商品P6666')
+
+        # self.data.setdefault('pay_bankcode',"904")
+        self._sign()
 
         try:
             self._request()
-            return (True,self.response)
+            print(self.response)
+            return (False, self.response['retMsg']) if self.response['retCode']!='SUCCESS' else (True,self.response['payParams']['payUrl'])
         except Exception as e:
             return (False,str(e))
 
