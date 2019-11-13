@@ -76,7 +76,7 @@ class TestDf(object):
     def dfQuery(self):
 
         self.data.setdefault("nonceStr",str(UtilTime().timestamp))
-        self.data.setdefault('down_ordercode','00005122')
+        self.data.setdefault('down_ordercode','1573636323')
 
         md5params = "{}{}{}{}{}".format(
             self.secret,
@@ -116,4 +116,4 @@ class TestDf(object):
 if __name__ == '__main__':
 
     testDfClass = TestDf()
-    print(testDfClass.df())
+    print(testDfClass.dfQuery())

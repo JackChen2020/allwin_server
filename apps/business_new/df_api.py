@@ -315,6 +315,7 @@ class daifuCallBack(object):
 #代付订单查询
 def daifuOrderQuery(request):
 
+    print(request.get("userid"),request.get("down_ordercode"))
     obj = CashoutList.objects.filter(userid=request.get("userid"),downordercode=request.get("down_ordercode"))
 
     if not obj.exists():
