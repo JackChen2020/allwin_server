@@ -242,7 +242,7 @@ class dfHandler(object):
         AccountCashoutConfirmForApi(user=self.user,amount=request["amount"]).run()
         AccountCashoutConfirmForApiFee(user=self.user).run()
 
-        daifuBalTixian(request,user)
+        daifuBalTixian(request,self.user)
 
         return None
 

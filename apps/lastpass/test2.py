@@ -38,10 +38,10 @@ class LastPassBase(object):
 class TestDf(object):
 
     def __init__(self):
-        self.secret = "RNRQKS2NBAEFJRFL"
+        self.secret = "XMXITYSK6DEKCTPT"
 
         self.data={
-            "businessid" : "109"
+            "businessid" : "169"
         }
 
     def _request(self,url):
@@ -76,7 +76,7 @@ class TestDf(object):
     def dfQuery(self):
 
         self.data.setdefault("nonceStr",str(UtilTime().timestamp))
-        self.data.setdefault('down_ordercode','00004657')
+        self.data.setdefault('down_ordercode','00005122')
 
         md5params = "{}{}{}{}{}".format(
             self.secret,
@@ -116,4 +116,4 @@ class TestDf(object):
 if __name__ == '__main__':
 
     testDfClass = TestDf()
-    print(testDfClass.BalQuery())
+    print(testDfClass.dfQuery())
