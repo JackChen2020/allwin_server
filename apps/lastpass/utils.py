@@ -4999,7 +4999,7 @@ class LastPass_JUXINGNEW(LastPassBase):
 
     def _request(self):
         result = request(method='POST', url=self.create_order_url, data=self.data, verify=True)
-        self.response = result.text
+        self.response = json.loads(result.content.decode('utf-8'))
 
     def run(self):
         self.data.setdefault('mchId',self.businessId)
