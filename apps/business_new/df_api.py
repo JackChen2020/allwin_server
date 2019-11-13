@@ -182,6 +182,7 @@ class dfHandler(object):
         # request['dfordercode'] = "DF%08d%s" % (self.user.userid,self.data.get("down_ordercode"))
         request['dfordercode'] = self.data.get("down_ordercode")
         request['userid'] =  self.user.userid
+        request["paypassid"] = self.paypasslinktype.passid
 
         return daifuOrderQuery(request)
 
@@ -348,6 +349,8 @@ def daifuOrderQuery(request):
         obj.textstatus = res
         obj.save()
         return {"data":{"msg":res}}
+    else:
+        raise PubErrorCustom("代付渠道有误!")
 
 #代付提现
 def daifuBalTixian(request,user):
