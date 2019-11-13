@@ -1047,7 +1047,7 @@ class CreateOrder(object):
             request_data = {
                 "amount": int(float(self.order.amount) * float(100.0)),
                 "mchOrderNo": str(self.order.ordercode),
-                "notifyUrl": url_join('/callback_api/lastpass/juxingnew_callback'),
+                "notifyUrl": url_join('/callback_api/lastpass/jiahui_callback'),
                 "productId" : pay_bankcode
             }
 
