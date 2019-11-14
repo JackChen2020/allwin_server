@@ -248,8 +248,8 @@ class dfHandler(object):
 
         ordercode = "DF%08d%s" % (self.user.userid, request["downordercode"])
 
-        AccountCashoutConfirmForApi(user=self.user, amount=request["amount"],ordercode=ordercode).run()
         AccountCashoutConfirmForApiFee(user=self.user,ordercode=ordercode).run()
+        AccountCashoutConfirmForApi(user=self.user, amount=request["amount"],ordercode=ordercode).run()
 
         # float(self.user.fee_rule)
 
@@ -317,8 +317,8 @@ class daifuCallBack(object):
                 continue
 
             ordercodetmp = "DF%08d%s" % (userid, ordercode)
-            AccountRollBackForApi(userid=userid, amount=float(amount),ordercode=ordercodetmp).run()
             AccounRollBackForApiFee(user=userid,ordercode=ordercodetmp).run()
+            AccountRollBackForApi(userid=userid, amount=float(amount),ordercode=ordercodetmp).run()
 
 
 #代付订单查询

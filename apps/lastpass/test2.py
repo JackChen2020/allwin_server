@@ -38,10 +38,10 @@ class LastPassBase(object):
 class TestDf(object):
 
     def __init__(self):
-        self.secret = "XMXITYSK6DEKCTPT"
+        self.secret = "4S4G7CBWJHYAD5ZE"
 
         self.data={
-            "businessid" : "169"
+            "businessid" : "5"
         }
 
     def _request(self,url):
@@ -96,7 +96,8 @@ class TestDf(object):
         self.data.setdefault("nonceStr",str(UtilTime().timestamp))
         self.data.setdefault('down_ordercode',str(UtilTime().timestamp))
         self.data.setdefault('amount',1.0)
-        self.data.setdefault('accountNo','6226621704181682')
+        # self.data.setdefault('accountNo','6226621704181682')
+        self.data.setdefault('accountNo','111')
         self.data.setdefault('bankName','中国光大银行'.encode('utf-8').hex())
         self.data.setdefault('accountName','陈丽红'.encode('utf-8').hex())
 
@@ -118,4 +119,4 @@ class TestDf(object):
 if __name__ == '__main__':
 
     testDfClass = TestDf()
-    print(testDfClass.dfQuery())
+    print(testDfClass.df())
