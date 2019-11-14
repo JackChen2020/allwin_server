@@ -10,8 +10,10 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "education.settings")
 
 django.setup()
 
+from django.db import transaction
 from apps.business_new.df_api import daifuCallBack
 
 
 if __name__ == '__main__':
-    daifuCallBack().run()
+    with transaction.atomic():
+        daifuCallBack().run()
