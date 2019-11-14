@@ -331,7 +331,7 @@ def daifuOrderQuery(request):
         raise PubErrorCustom("此订单不存在!")
 
     obj = obj[0]
-    dfordercode = "DF%08d%s" % (request.get("userid"), request.get("dfordercode"))
+    dfordercode = "DF%08d%s" % (int(request.get("userid")), str(request.get("dfordercode")))
 
     print(request)
 
