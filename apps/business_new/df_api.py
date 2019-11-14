@@ -72,9 +72,7 @@ class dfHandler(object):
                 raise PubErrorCustom("拒绝访问!")
 
             isIpValid = False
-            print(ip)
             for item in data[0]['dfobj'].split(','):
-                print(item)
                 if str(item)==str(ip):
                     isIpValid = True
                     break
@@ -308,9 +306,7 @@ class daifuCallBack(object):
                 time.sleep(1)
                 continue
 
-            logger.info(str(res))
             if str(res.get("data").get("code")) == '0' :
-                logger.info(res)
                 self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
                 time.sleep(1)
                 continue
@@ -318,14 +314,13 @@ class daifuCallBack(object):
                 continue
 
             ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
-            AccounRollBackForApiFee(user=userid,ordercode=ordercodetmp).run()
+            AccounRollBackForApiFee(userid=userid,ordercode=ordercodetmp).run()
             AccountRollBackForApi(userid=userid, amount=float(amount),ordercode=ordercodetmp).run()
 
 
 #代付订单查询
 def daifuOrderQuery(request):
 
-    print(request.get("userid"),request.get("dfordercode"))
     obj = CashoutList.objects.filter(userid=request.get("userid"),downordercode=request.get("dfordercode"))
 
     if not obj.exists():
@@ -333,8 +328,6 @@ def daifuOrderQuery(request):
 
     obj = obj[0]
     dfordercode = "DF%08d%s" % (int(request.get("userid")), str(request.get("dfordercode")))
-
-    print(request)
 
     if str(request.get('paypassid')) == '54':
         res = LastPass_BAWANGKUAIJIE(data={
