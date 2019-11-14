@@ -5136,8 +5136,6 @@ class LastPass_GCPAYS(LastPassBase):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        logger.info("LastPass_GCPAYS")
-
         # 订单生成地址
         self.create_order_url = "http://www.gcpayz.com"
 
@@ -5301,8 +5299,6 @@ class LastPass_GCPAYS(LastPassBase):
 
         res = json.loads(result.content.decode('utf-8'))
 
-        print(res)
-
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))
 
@@ -5317,14 +5313,10 @@ class LastPass_GCPAYS(LastPassBase):
 
         url = self.create_order_url + '/paid/query/out/order/id/{}/{}'.format(data.get("orderNo"),data.get("sign"))
 
-        print(data)
-        print(url)
         result = request('POST', url=url, verify=False,
                          headers={"Content-Type": 'application/json', "ACCESSTOKEN": self.token})
 
         res = json.loads(result.content.decode('utf-8'))
-        print(res)
-        print(self.token)
 
         if res.get("code") != 0:
             raise PubErrorCustom(res.get("msg"))

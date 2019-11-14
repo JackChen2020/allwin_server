@@ -80,6 +80,7 @@ class AccountBase(object):
             self.user.save()
 
     def AccountListInsert(self,memo):
+
         BalList.objects.create(**{
             "userid" : self.user.userid,
             "amount" : self.amount,
