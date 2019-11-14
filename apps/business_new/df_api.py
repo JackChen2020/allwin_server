@@ -314,8 +314,14 @@ class daifuCallBack(object):
                 continue
 
             ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
-            AccounRollBackForApiFee(userid=userid,ordercode=ordercodetmp).run()
-            AccountRollBackForApi(userid=userid, amount=float(amount),ordercode=ordercodetmp).run()
+            try:
+                user = Users.objects.select_for_update().get(userid=userid)
+            except Users.DoesNotExist:
+                logger.info("无此用户信息!")
+                logger.info("{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                continue
+            AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
+            AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
 
 
 #代付订单查询
