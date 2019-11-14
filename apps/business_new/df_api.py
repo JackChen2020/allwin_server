@@ -317,7 +317,7 @@ class daifuCallBack(object):
             elif str(res.get("data").get("code")) == '1' :
                 continue
 
-            ordercodetmp = "DF%08d%s" % (userid, ordercode)
+            ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
             AccounRollBackForApiFee(user=userid,ordercode=ordercodetmp).run()
             AccountRollBackForApi(userid=userid, amount=float(amount),ordercode=ordercodetmp).run()
 
