@@ -18,7 +18,7 @@ from libs.utils.mytime import UtilTime
 from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE,LastPass_GCPAYS
 from libs.utils.string_extension import hexStringTobytes
 from apps.cache.utils import RedisCaCheHandler
-from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApiFee
+from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApiFee,AccounRollBackForApiFee,AccountRollBackForApi
 
 from apps.pay.models import PayPassLinkType
 
@@ -246,14 +246,21 @@ class dfHandler(object):
 
         daifuBalTixian(request,self.user)
 
-        AccountCashoutConfirmForApi(user=self.user, amount=request["amount"]).run()
-        AccountCashoutConfirmForApiFee(user=self.user).run()
+        ordercode = "DF%08d%s" % (self.user.userid, request["downordercode"])
 
-        # daifu = daifuCallBack()
-        # daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}".format(self.user.userid, request["amount"], request["downordercode"], self.paypasslinktype.passid, UtilTime().today.replace(minutes=30).timestamp))
+        AccountCashoutConfirmForApi(user=self.user, amount=request["amount"],ordercode=ordercode).run()
+        AccountCashoutConfirmForApiFee(user=self.user,ordercode=ordercode).run()
+
+        # float(self.user.fee_rule)
+
+        daifu = daifuCallBack()
+        daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}".format(
+            self.user.userid,
+            request["amount"],
+            request["downordercode"],
+            request["paypassid"],
+            UtilTime().today.replace(minutes=120).timestamp))
         return None
-
-
 
     def run(self):
 
@@ -287,7 +294,7 @@ class daifuCallBack(object):
             try:
                 res = daifuOrderQuery(request={
                     "userid": userid,
-                    "down_ordercode": ordercode,
+                    "dfordercode": ordercode,
                     "paypassid": paypassid
                 })
             except PubErrorCustom as e:
@@ -301,16 +308,17 @@ class daifuCallBack(object):
                 time.sleep(1)
                 continue
 
-            if "成功" not in res.get("data").get("msg") :
+            if str(res.get("data").get("code")) == '0' :
                 logger.info(res)
                 self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
                 time.sleep(1)
                 continue
+            elif str(res.get("data").get("code")) == '1' :
+                continue
 
-            user = Users.objects.select_for_update().get(userid=userid)
-
-            AccountCashoutConfirmForApi(user=user, amount=float(amount)).run()
-            AccountCashoutConfirmForApiFee(user=user).run()
+            ordercodetmp = "DF%08d%s" % (userid, ordercode)
+            AccountRollBackForApi(userid=userid, amount=float(amount),ordercode=ordercodetmp).run()
+            AccounRollBackForApiFee(user=userid,ordercode=ordercodetmp).run()
 
 
 #代付订单查询

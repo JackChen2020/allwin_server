@@ -406,6 +406,88 @@ class AccountCashoutConfirmForApiFee(AccountBase):
 
         return self.user
 
+class AccountRollBackForApi(AccountBase):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("isCashoutConfirm", True)
+        super().__init__(**kwargs)
+
+    def run(self):
+        logger.info("Api代付失败冲正")
+        self.amount = self.amount * -1 * -1
+        self.AccountListInsert("Api代付失败冲正")
+
+        self.user.today_cashout_amount = float(self.user.today_cashout_amount) + self.amount * -1
+        self.user.tot_cashout_amount = float(self.user.tot_cashout_amount) + self.amount * -1
+
+        # self.user.cashout_bal = float(self.user.cashout_bal) + self.amount
+        self.user.today_bal = float(self.user.today_bal) + self.amount
+        self.user.bal = float(self.user.bal) + self.amount
+        self.user.save()
+        logger.info("""动账后: userid:{} upd_bal_date:{} amount:{} ordercode:{} bal:{} cashout_bal:{} stop_bal:{} lastday_bal:{} today_bal:{} lastday_pay_amount:{} 
+                        today_pay_amount:{} tot_pay_amount:{} lastday_cashout_amount:{} today_cashout_amount:{} tot_cashout_amount:{}""".format(
+            self.user.userid,
+            self.user.upd_bal_date,
+            self.amount,
+            self.ordercode,
+            self.user.bal,
+            self.user.cashout_bal,
+            self.user.stop_bal,
+            self.user.lastday_bal,
+            self.user.today_bal,
+            self.user.lastday_pay_amount,
+            self.user.today_pay_amount,
+            self.user.tot_pay_amount,
+            self.user.lastday_cashout_amount,
+            self.user.today_cashout_amount,
+            self.user.tot_cashout_amount,
+        ))
+
+        return self.user
+
+class AccounRollBackForApiFee(AccountBase):
+    def __init__(self, **kwargs):
+        kwargs.setdefault("isCashoutConfirm", True)
+        kwargs.setdefault("amount",0.1)
+        super().__init__(**kwargs)
+
+    def run(self):
+        logger.info("Api代付手续费冲正")
+        if self.user.fee_rule <= 0.0:
+            self.amount = get_fee_rule_forSys()
+        else:
+            self.amount = float(self.user.fee_rule)
+        self.amount = self.amount * -1 * -1
+        self.AccountListInsert("Api代付手续费冲正")
+
+        self.user.today_fee_amount = float(self.user.today_fee_amount) + self.amount * -1
+        self.user.tot_fee_amount = float(self.user.tot_fee_amount) + self.amount * -1
+
+        self.user.today_bal = float(self.user.today_bal) + self.amount
+        self.user.bal = float(self.user.bal) + self.amount
+        self.user.save()
+
+        logger.info("""动账后: userid:{} upd_bal_date:{} amount:{} ordercode:{} bal:{} cashout_bal:{} stop_bal:{} lastday_bal:{} today_bal:{} lastday_pay_amount:{} 
+                        today_pay_amount:{} tot_pay_amount:{} lastday_cashout_amount:{} today_cashout_amount:{} tot_cashout_amount:{}""".format(
+            self.user.userid,
+            self.user.upd_bal_date,
+            self.amount,
+            self.ordercode,
+            self.user.bal,
+            self.user.cashout_bal,
+            self.user.stop_bal,
+            self.user.lastday_bal,
+            self.user.today_bal,
+            self.user.lastday_pay_amount,
+            self.user.today_pay_amount,
+            self.user.tot_pay_amount,
+            self.user.lastday_cashout_amount,
+            self.user.today_cashout_amount,
+            self.user.tot_cashout_amount,
+        ))
+
+        return self.user
+
+
 class AccountRefreshUpdDate(AccountBase):
     """
     每天凌晨0点0分1秒刷新upd_date时间
