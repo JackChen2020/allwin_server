@@ -10,9 +10,19 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "education.settings")
 
 django.setup()
 
-
+from django.db import transaction
 from apps.business_new.df_api import daifuCallBack
+
+from apps.user.models import BalList
 
 
 if __name__ == '__main__':
-    daifuCallBack().run()
+    with transaction.atomic():
+        BalList.objects.create(**{
+            "userid" :10000,
+            "amount" : 1,
+            "bal" : 1,
+            "confirm_bal" : 1,
+            "memo" : '1',
+            "ordercode": '1'
+        })

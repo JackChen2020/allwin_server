@@ -10,6 +10,7 @@ import time
 from libs.utils.string_extension import hexStringTobytes
 
 from utils.log import logger
+from django.db import transaction
 import hashlib
 
 from apps.utils import upd_bal
@@ -314,14 +315,15 @@ class daifuCallBack(object):
                 continue
 
             ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
-            try:
-                user = Users.objects.select_for_update().get(userid=userid)
-            except Users.DoesNotExist:
-                logger.info("无此用户信息!")
-                logger.info("{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
-                continue
-            AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
-            AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
+            with transaction.atomic():
+                try:
+                    user = Users.objects.select_for_update().get(userid=userid)
+                except Users.DoesNotExist:
+                    logger.info("无此用户信息!")
+                    logger.info("{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                    continue
+                AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
+                AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
 
 
 #代付订单查询
