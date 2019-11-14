@@ -308,6 +308,7 @@ class daifuCallBack(object):
                 time.sleep(1)
                 continue
 
+            logger.info(str(e))
             if str(res.get("data").get("code")) == '0' :
                 logger.info(res)
                 self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
