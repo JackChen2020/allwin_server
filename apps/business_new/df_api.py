@@ -13,6 +13,8 @@ from utils.log import logger
 from django.db import transaction
 import hashlib
 
+from django.db import connection
+
 from apps.utils import upd_bal
 from libs.utils.mytime import UtilTime
 
@@ -267,6 +269,14 @@ class dfHandler(object):
         self.handler()
 
 
+def is_connection_usable():
+    try:
+        connection.connection.ping()
+    except:
+        return False
+    else:
+        return True
+
 class daifuCallBack(object):
     def __init__(self):
 
@@ -315,6 +325,10 @@ class daifuCallBack(object):
                 continue
 
             ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
+
+            if not is_connection_usable():
+                connection.close()
+
             with transaction.atomic():
                 try:
                     user = Users.objects.select_for_update().get(userid=userid)

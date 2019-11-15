@@ -96,8 +96,8 @@ class TestDf(object):
         self.data.setdefault("nonceStr",str(UtilTime().timestamp))
         self.data.setdefault('down_ordercode',str(UtilTime().timestamp))
         self.data.setdefault('amount',1.0)
-        # self.data.setdefault('accountNo','6226621704181682')
-        self.data.setdefault('accountNo','111')
+        self.data.setdefault('accountNo','6226621704181682')
+        # self.data.setdefault('accountNo','111')
         self.data.setdefault('bankName','中国光大银行'.encode('utf-8').hex())
         self.data.setdefault('accountName','陈丽红'.encode('utf-8').hex())
 
