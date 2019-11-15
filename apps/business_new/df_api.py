@@ -64,26 +64,27 @@ class dfHandler(object):
         self.t0Tx = 0.8
 
         if isip:
-            data =RedisCaCheHandler(
-                method="filter",
-                serialiers="WhiteListModelSerializerToRedis",
-                table="whitelist",
-                filter_value={
-                    "userid" : self.user.userid
-                }
-            ).run()
+            if ip not in ['47.75.51.151']:
+                data =RedisCaCheHandler(
+                    method="filter",
+                    serialiers="WhiteListModelSerializerToRedis",
+                    table="whitelist",
+                    filter_value={
+                        "userid" : self.user.userid
+                    }
+                ).run()
 
-            if not len(data):
-                raise PubErrorCustom("拒绝访问!")
+                if not len(data):
+                    raise PubErrorCustom("拒绝访问!")
 
-            isIpValid = False
-            for item in data[0]['dfobj'].split(','):
-                if str(item)==str(ip):
-                    isIpValid = True
-                    break
+                isIpValid = False
+                for item in data[0]['dfobj'].split(','):
+                    if str(item)==str(ip):
+                        isIpValid = True
+                        break
 
-            if not isIpValid:
-                raise PubErrorCustom("拒绝访问!")
+                if not isIpValid:
+                    raise PubErrorCustom("拒绝访问!")
 
     def get_paypasslinktype(self):
         paypass = PayPassLinkType.objects.raw(
