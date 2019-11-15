@@ -34,6 +34,8 @@ class dfHandler(object):
 
     def __init__(self,data,ip=None,islock=False,isip=True):
 
+        print(ip)
+
 
         self.data = data
 
