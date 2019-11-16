@@ -49,7 +49,6 @@ class PublicAPIView(viewsets.ViewSet):
         return None
 
 
-
     @list_route(methods=['GET'])
     @Core_connector(pagination=True)
     def get_qrtype(self, request):

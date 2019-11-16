@@ -91,6 +91,7 @@ class CashoutList(models.Model):
     tranid = models.CharField(default='',verbose_name="交易流水号,代付产生",max_length=120)
     paypassid = models.BigIntegerField(default=0,verbose_name="代付产生,渠道号")
     downordercode = models.CharField(default='',max_length=120,verbose_name="商户订单号")
+    memo = models.CharField(default="",max_length=255,verbose_name="备注")
 
     def save(self, *args, **kwargs):
         t = time.mktime(timezone.now().timetuple())

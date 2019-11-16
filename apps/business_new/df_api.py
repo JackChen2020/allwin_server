@@ -247,6 +247,7 @@ class dfHandler(object):
         request["open_name"] = hexStringTobytes(self.data.get("accountName")).decode('utf-8')
         request["bank_card_number"] = self.data.get("accountNo")
         request["downordercode"] = self.data.get('down_ordercode')
+        request["memo"] = self.data.get("memo")
 
         daifuBalTixian(request,self.user)
 
@@ -388,11 +389,12 @@ def daifuBalTixian(request,user):
             "userid": user.userid,
             "name": user.name,
             "amount": request.get("amount"),
-            "bank_name": request('bank_name'),
-            "open_name": request('open_name'),
+            "bank_name": request.get('bank_name'),
+            "open_name": request.get('open_name'),
             "bank_card_number": request.get('bank_card_number'),
             "status": "0",
-            "downordercode"  : request['downordercode']
+            "downordercode"  : request['downordercode'],
+            "memo" : request['memo']
         })
 
         res = LastPass_BAWANGKUAIJIE(data={
@@ -419,7 +421,8 @@ def daifuBalTixian(request,user):
             "open_name": request.get('open_name'),
             "bank_card_number": request.get('bank_card_number'),
             "status": "0",
-            "downordercode": request['downordercode']
+            "downordercode": request['downordercode'],
+            "memo": request['memo']
         })
 
         res = LastPass_KUAIJIE().df_api(data={
@@ -446,7 +449,8 @@ def daifuBalTixian(request,user):
             "open_name": request.get('open_name'),
             "bank_card_number": request.get('bank_card_number'),
             "status": "0",
-            "downordercode": request['downordercode']
+            "downordercode": request['downordercode'],
+            "memo": request['memo']
         })
 
         res = LastPass_GCPAYS().df_api(data={
