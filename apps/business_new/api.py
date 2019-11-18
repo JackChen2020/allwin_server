@@ -17,7 +17,7 @@ from libs.utils.exceptions import PubErrorCustom
 
 from apps.order.models import CashoutList
 from apps.user.models import Users
-
+from apps.business_new.df_api import daifuOrderQuery
 from apps.account import AccounRollBackForApiFee,AccountRollBackForApi
 
 
@@ -73,6 +73,23 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def JdOrderQuery(self,request):
 
         return jdHandler(request.data).OrderQuery()
+
+    @list_route(methods=['GET'])
+    @Core_connector_DAIFU(transaction=True)
+    def DF_duizhang(self,request):
+
+        for item in CashoutList.objects.filter(paypassid=69):
+            res = daifuOrderQuery(request={
+                "userid": item.userid,
+                "dfordercode": item.downordercode,
+                "paypassid": item.paypassid
+            })
+
+            item.df_status = res.get("data").get("code")
+            item.save()
+
+        return None
+
 
     @list_route(methods=['POST'])
     @Core_connector_DAIFU(transaction=True)
