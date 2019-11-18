@@ -39,7 +39,7 @@ class CreateOrder(object):
             SELECT t1.*,t2.typename ,t2.name as paytypename,t3.name as paypassname,t3.rules as rules,t3.custom as custom FROM paypasslinktype as t1 
             INNER JOIN paytype as t2 on t1.paytypeid = t2.paytypeid
             INNER JOIN paypass as t3 on t1.passid = t3.paypassid
-            WHERE t1.to_id=%s and t1.type='1' 
+            WHERE t1.to_id=%s and t1.type='1' and t3.status='0'
             """, [self.user.userid]
         )
         paypass = list(paypass)
