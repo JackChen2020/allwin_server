@@ -107,9 +107,9 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def DF_chongzheng(self,request):
 
         redisRes=request.data.get("row")
-        userid = redisRes.decode('utf-8').split("|")[0]
-        amount = redisRes.decode('utf-8').split("|")[1]
-        ordercode = redisRes.decode('utf-8').split("|")[2]
+        userid = redisRes.split("|")[0]
+        amount = redisRes.split("|")[1]
+        ordercode = redisRes.split("|")[2]
 
         try:
             obj = CashoutList.objects.get(id=request.data.get("id"))
