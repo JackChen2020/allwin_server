@@ -331,16 +331,6 @@ class daifuCallBack(object):
                                                                            cashout_id, endtime))
                         time.sleep(1)
                     continue
-                    # ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
-
-                    # try:
-                    #     user = Users.objects.select_for_update().get(userid=userid)
-                    # except Users.DoesNotExist:
-                    #     logger.info("无此用户信息!")
-                    #     logger.info("{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
-                    #     continue
-                    # AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
-                    # AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
             except Exception as e:
                 logger.info(str(e))
                 self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,cashout_id,endtime))
