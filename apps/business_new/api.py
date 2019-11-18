@@ -110,13 +110,14 @@ class BusinessNewAPIView(GenericViewSetCustom):
         userid = redisRes.split("|")[0]
         amount = redisRes.split("|")[1]
         ordercode = redisRes.split("|")[2]
+        cashout_id = redisRes.split("|")[4]
 
         try:
-            obj = CashoutList.objects.get(id=request.data.get("id"))
+            obj = CashoutList.objects.get(id=cashout_id)
             obj.df_status = '2'
             obj.save()
         except CashoutList.DoesNotExist:
-            raise PubErrorCustom("无此提现明细!{}".format(request.data.get("id")))
+            raise PubErrorCustom("无此提现明细!{}".format(cashout_id))
 
         ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
 
