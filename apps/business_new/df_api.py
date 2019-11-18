@@ -377,8 +377,8 @@ def daifuOrderQuery(request):
         res=LastPass_GCPAYS().df_order_query(data={
             "orderNo" : dfordercode
         })
-        obj.textstatus = res[1]
-        obj.save()
+        # obj.textstatus = res[1]
+        # obj.save()
         return {"data":{"code":res[0],"msg":res[1]}}
     else:
         raise PubErrorCustom("代付渠道有误!")
