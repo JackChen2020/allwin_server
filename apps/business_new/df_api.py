@@ -1,31 +1,22 @@
-
-from apps.user.models import Users
-
-from utils.exceptions import PubErrorCustom
-
-from apps.order.models import CashoutList
-
 import time
-
-from libs.utils.string_extension import hexStringTobytes
-
-from utils.log import logger
-from django.db import transaction
 import hashlib
+import json
+from requests import request as requestHandler
 
+from django.db import transaction
 from django.db import connection
 
-from apps.utils import upd_bal
+from libs.utils.exceptions import PubErrorCustom
+from libs.utils.log import logger
 from libs.utils.mytime import UtilTime
-
-from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE,LastPass_GCPAYS
 from libs.utils.string_extension import hexStringTobytes
+
+from apps.user.models import Users
+from apps.order.models import CashoutList
+from apps.lastpass.utils import LastPass_BAWANGKUAIJIE,LastPass_KUAIJIE,LastPass_GCPAYS
 from apps.cache.utils import RedisCaCheHandler
-from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApiFee,AccounRollBackForApiFee,AccountRollBackForApi
-
+from apps.account import AccountCashoutConfirmForApi,AccountCashoutConfirmForApiFee
 from apps.pay.models import PayPassLinkType
-
-
 from apps.utils import RedisHandler
 
 
@@ -249,7 +240,7 @@ class dfHandler(object):
         request["downordercode"] = self.data.get('down_ordercode')
         request["memo"] = self.data.get("memo")
 
-        daifuBalTixian(request,self.user)
+        cashout_id = daifuBalTixian(request,self.user)
 
         ordercode = "DF%08d%s" % (self.user.userid, request["downordercode"])
 
@@ -259,11 +250,12 @@ class dfHandler(object):
         # float(self.user.fee_rule)
 
         daifu = daifuCallBack()
-        daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}".format(
+        daifu.redis_client.lpush(daifu.lKey, "{}|{}|{}|{}|{}|{}".format(
             self.user.userid,
             request["amount"],
             request["downordercode"],
             request["paypassid"],
+            cashout_id,
             UtilTime().today.replace(minutes=120).timestamp))
         return None
 
@@ -300,7 +292,8 @@ class daifuCallBack(object):
             amount = redisRes.decode('utf-8').split("|")[1]
             ordercode = redisRes.decode('utf-8').split("|")[2]
             paypassid = redisRes.decode('utf-8').split("|")[3]
-            endtime = redisRes.decode('utf-8').split("|")[4]
+            cashout_id = redisRes.decode('utf-8').split("|")[4]
+            endtime = redisRes.decode('utf-8').split("|")[5]
 
             if UtilTime().timestamp >= int(endtime):
                 continue
@@ -310,39 +303,49 @@ class daifuCallBack(object):
                     "dfordercode": ordercode,
                     "paypassid": paypassid
                 })
-            except PubErrorCustom as e:
-                logger.info(str(e.msg))
-                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
-                time.sleep(1)
-                continue
+
+                if str(res.get("data").get("code")) == '0' :
+                    self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,cashout_id,endtime))
+                    time.sleep(1)
+                    continue
+                elif str(res.get("data").get("code")) == '1' :
+                    result = requestHandler(method="POST",url="http://allwin6666.com/api_new/business/DF_status_save",data={"id":cashout_id})
+                    result = json.loads(result.content.decode('utf-8'))
+
+                    if str(result['rescode']) != '0000':
+                        logger.info(result['msg'])
+                        self.redis_client.lpush(self.lKey,
+                                                "{}|{}|{}|{}|{}|{}".format(userid, amount, ordercode, paypassid,
+                                                                           cashout_id, endtime))
+                        time.sleep(1)
+                    continue
+                else:
+                    result = requestHandler(method="POST", url="http://allwin6666.com/api_new/business/DF_chongzheng",
+                                            data={"row": redisRes})
+                    result = json.loads(result.content.decode('utf-8'))
+
+                    if str(result['rescode']) != '0000':
+                        logger.info(result['msg'])
+                        self.redis_client.lpush(self.lKey,
+                                                "{}|{}|{}|{}|{}|{}".format(userid, amount, ordercode, paypassid,
+                                                                           cashout_id, endtime))
+                        time.sleep(1)
+                    continue
+                    # ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
+
+                    # try:
+                    #     user = Users.objects.select_for_update().get(userid=userid)
+                    # except Users.DoesNotExist:
+                    #     logger.info("无此用户信息!")
+                    #     logger.info("{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                    #     continue
+                    # AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
+                    # AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
             except Exception as e:
                 logger.info(str(e))
-                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
+                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,cashout_id,endtime))
                 time.sleep(1)
                 continue
-
-            if str(res.get("data").get("code")) == '0' :
-                self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
-                time.sleep(1)
-                continue
-            elif str(res.get("data").get("code")) == '1' :
-                continue
-
-            ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
-
-            if not is_connection_usable():
-                connection.close()
-
-            with transaction.atomic():
-                try:
-                    user = Users.objects.select_for_update().get(userid=userid)
-                except Users.DoesNotExist:
-                    logger.info("无此用户信息!")
-                    logger.info("{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,endtime))
-                    continue
-                AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
-                AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
-
 
 #代付订单查询
 def daifuOrderQuery(request):
@@ -410,7 +413,7 @@ def daifuBalTixian(request,user):
         cashlist.tranid = res['REP_BODY']['tranId']
         cashlist.save()
 
-        return None
+        return cashlist.id
     elif str(request.get('paypassid')) == '51':
 
         cashlist = CashoutList.objects.create(**{
@@ -468,6 +471,6 @@ def daifuBalTixian(request,user):
         cashlist.tranid = cashlist.downordercode
         cashlist.save()
 
-        return None
+        return cashlist.id
     else:
         raise PubErrorCustom("代付渠道有误!")

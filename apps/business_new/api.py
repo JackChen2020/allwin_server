@@ -15,6 +15,11 @@ from django.shortcuts import render
 from apps.utils import RedisOrderCreate
 from libs.utils.exceptions import PubErrorCustom
 
+from apps.order.models import CashoutList
+from apps.user.models import Users
+
+from apps.account import AccounRollBackForApiFee,AccountRollBackForApi
+
 
 class BusinessNewAPIView(GenericViewSetCustom):
 
@@ -68,6 +73,45 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def JdOrderQuery(self,request):
 
         return jdHandler(request.data).OrderQuery()
+
+    @list_route(methods=['POST'])
+    @Core_connector_DAIFU(transaction=True)
+    def DF_status_save(self,request):
+        try:
+            obj = CashoutList.objects.get(id=request.data.get("id"))
+            obj.df_status = '0'
+            obj.save()
+        except CashoutList.DoesNotExist:
+            raise PubErrorCustom("无此提现明细!{}".format(request.data.get("id")))
+        return None
+
+    @list_route(methods=['POST'])
+    @Core_connector_DAIFU(transaction=True)
+    def DF_chongzheng(self,request):
+
+        redisRes=request.data.get("row")
+        userid = redisRes.decode('utf-8').split("|")[0]
+        amount = redisRes.decode('utf-8').split("|")[1]
+        ordercode = redisRes.decode('utf-8').split("|")[2]
+
+        try:
+            obj = CashoutList.objects.get(id=request.data.get("id"))
+            obj.df_status = '2'
+            obj.save()
+        except CashoutList.DoesNotExist:
+            raise PubErrorCustom("无此提现明细!{}".format(request.data.get("id")))
+
+        ordercodetmp = "DF%08d%s" % (int(userid), str(ordercode))
+
+        try:
+            user = Users.objects.select_for_update().get(userid=userid)
+        except Users.DoesNotExist:
+            raise PubErrorCustom("无此用户信息")
+        AccounRollBackForApiFee(user=user,ordercode=ordercodetmp).run()
+        AccountRollBackForApi(user=user, amount=float(amount),ordercode=ordercodetmp).run()
+
+        return None
+
 
     @list_route(methods=['POST'])
     @Core_connector_NEICHONG(transaction=True)
