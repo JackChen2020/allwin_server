@@ -1,12 +1,19 @@
 from apps.utils import GenericViewSetCustom
 from rest_framework.decorators import list_route
 
-from core.decorator.response_new import Core_connector,Core_connector_DAIFU,Core_connector_NEICHONG
+from libs.core.decorator.response_new import Core_connector
+from libs.core.decorator.response_new1 import Core_connector_Response_Html
+from libs.core.decorator.response_daifu import Core_connector_DAIFU
+from libs.core.decorator.response_neichong import Core_connector_NEICHONG
 
 from apps.business.utils import CreateOrder
 from apps.business_new.df_api import dfHandler
 from apps.business_new.jd_api import jdHandler
 from apps.lastpass.utils import LastPass_GCPAYS
+from django.shortcuts import render
+
+from apps.utils import RedisOrderCreate
+from libs.utils.exceptions import PubErrorCustom
 
 
 class BusinessNewAPIView(GenericViewSetCustom):
@@ -14,11 +21,21 @@ class BusinessNewAPIView(GenericViewSetCustom):
     @list_route(methods=['POST'])
     @Core_connector()
     def create_order(self, request, *args, **kwargs):
-
         data={}
         for item in request.data:
             data[item] = request.data[item]
         return {"data":CreateOrder(user=request.user, request_param=data, lock="1").run()}
+
+    @list_route(methods=['GET'])
+    @Core_connector_Response_Html()
+    def DownOrder(self,request):
+
+        html = RedisOrderCreate().redis_get(request.query_params.get("o"))
+        print(html)
+        if not html:
+            raise PubErrorCustom("此订单已过期!")
+        else:
+            return render(request, html)
 
     @list_route(methods=['POST'])
     @Core_connector_DAIFU(transaction=True)
@@ -51,7 +68,6 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def JdOrderQuery(self,request):
 
         return jdHandler(request.data).OrderQuery()
-
 
     @list_route(methods=['POST'])
     @Core_connector_NEICHONG(transaction=True)

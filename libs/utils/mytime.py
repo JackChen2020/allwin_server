@@ -126,15 +126,13 @@ def add_time(start, end):
 #	 def get_year_start_end():
 #		 return DateUtilsBase.get_year_start(), DateUtilsBase.get_year_end()
 
+import arrow
 
 class UtilTime(object):
 
-    def __init__(self, timezone='local', arrow=None):
+    def __init__(self, timezone='local'):
 
         self.arrow = arrow
-        if not self.arrow:
-            import arrow
-            self.arrow = arrow
         #时区
         self.timezone = timezone
 
@@ -238,5 +236,65 @@ class UtilTime(object):
 
 
 if __name__ == '__main__':
-    print(UtilTime().today.replace(months=-2).timestamp)
+
+
+    class CustDateType(object):
+
+        @staticmethod
+        def get_amount(obj):
+            if obj['unit'] == 'F':
+                return "%.{}lf".format(int(obj['point']))%(float(obj['value'])*100.0)
+            elif obj['unit'] == 'Y' :
+                return "%.{}lf".format(int(obj['point']))%(float(obj['value']))
+            else:
+                print("标志错误!")
+
+        @staticmethod
+        def get_date(obj):
+            if obj.get("type") == "appoint":
+                return obj.get("value")
+            else:
+                ut = UtilTime()
+                return  ut.timestamp \
+                    if obj.get("format", None) == 'timestamp' else \
+                        ut.arrow_to_string(arrow_s=ut.today,format_v=obj.get("format",None)) if obj.get("format",None) \
+                            else ut.arrow_to_string(arrow_s=ut.today)
+
+        @staticmethod
+        def get_string(obj):
+            return str(obj.get("value"))
+
+        @staticmethod
+        def get_int(obj):
+            return int(obj.get("value"))
+
+
+    rules={"request_url": "http://localhost:9001", "request_urlCallBack": "http://localhost:9001", "request_method": "POST",
+     "request_type": "json", "requestData": [
+        {"key": "Amt", "dataType": "amount", "type": "appoint", "value": "amount", "unit": "Y", "point": 2,
+         "sign": True},
+        {"key": "OrderId", "dataType": "string", "type": "appoint", "value": "ordercode", "sign": True},
+        {"key": "UserId", "dataType": "string", "type": "custom", "value": "5", "sign": True},
+        {"key": "SignType", "dataType": "string", "type": "custom", "value": "MD5", "sign": False},
+        {"key": "DateTime", "dataType": "date", "type": "custom", "value": "", "sign": True, "format": "timestamp"},
+        {"key": "secret", "dataType": "string", "type": "custom", "value": "sfsfadf123213", "sign": False}],
+     "sign_signKey": "sign", "sign_signType": "md5", "sign_signEncode": "UTF-8", "sign_signDataType": "key-ascii-sort",
+     "sign_dataType": "upper", "sign_signValue": "", "sign_signBefore": "", "sign_signAppend": "-{secret}",
+     "request_secret": "ddddddddddd"}
+
+    request_data={
+        "amount" : 100.987,
+        "ordercode":123123213,
+        "date1": "20180101",
+        "bankcode" : "11123123"
+    }
+
+    data={}
+    for item in rules['requestData']:
+        if 'value' in item:
+            item['value'] = request_data.get(item['value']) if item.get("type") == "appoint" else item['value']
+        res = getattr(CustDateType,"get_{}".format(item['dataType']))(item)
+
+        data[item['key']] = res
+    print(data)
 

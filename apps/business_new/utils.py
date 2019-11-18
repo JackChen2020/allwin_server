@@ -6,44 +6,50 @@ from requests import request
 from libs.utils.exceptions import PubErrorCustom
 from libs.utils.mytime import UtilTime
 from libs.utils.string_extension import md5pass
+from libs.utils.log import logger
+from apps.utils import RedisOrderCreate
 
 class CreateOrderForLastPass(object):
 
     def __init__(self,**kwargs):
 
         #规则
-        self.rules = kwargs.get("rules"),None
+        self.rules = kwargs.get("rules",None)
 
         #传入数据
-        self.data = kwargs.get("data"),None
+        self.data = kwargs.get("data",None)
+
+        logger.info("规则：{}".format(self.rules))
 
         #请求数据
-        self.request_data = None
+        self.request_data = {}
 
         #参加签名数据
-        self.request_data_sign = None
+        self.request_data_sign = {}
 
         #返回数据
         self.response = None
 
     #数据整理
-    def dataHandler(self,data):
+    def dataHandler(self):
+
         for item in self.rules.get("requestData"):
             if 'value' in item:
-                item['value'] = data.get(item['value']) if item.get("type") == "appoint" else item['value']
+                item['value'] = self.data.get(item['value']) if item.get("type") == "appoint" else item['value']
             res = getattr(CustDateType, "get_{}".format(item['dataType']))(item)
-
             self.request_data[item['key']] = res
             if item.get("sign",None) :
                 self.request_data_sign[item['key']] = res
 
     #签名
-    def signHandler(self,signRules):
+    def signHandler(self):
         sign = SignBase(
-            hashData=self.request_data_sign,
-            signRules=signRules
+            hashData=self.request_data,
+            signData=self.request_data_sign,
+            signRules=self.rules['sign']
         ).run()
-        self.request_data[signRules['signKey']] = sign
+
+        self.request_data[self.rules['sign']['signKey']] = sign
 
     #向上游发起请求
     def requestHandlerForJson(self):
@@ -54,6 +60,7 @@ class CreateOrderForLastPass(object):
             "type":"json",
         },
         """
+        logger.info("向上游请求的值：{}".format(self.request_data))
         if self.rules.get("request").get("type") == 'json':
             result = request(
                 url=self.rules.get("request").get("url"),
@@ -80,6 +87,7 @@ class CreateOrderForLastPass(object):
 
         try :
             self.response = json.loads(result.content.decode('utf-8'))
+            logger.info("上游返回值：{}".format(self.response))
         except Exception as e:
             raise PubErrorCustom("返回JSON错误!{}".format(result.text))
 
@@ -101,26 +109,59 @@ class CreateOrderForLastPass(object):
 
     #向上游发起请求
     def requestHandlerForHtml(self):
-        pass
+
+        html="""
+            <html lang="zh-CN"><head>
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>傲银支付</title>
+            </head>
+                <body>
+                    <div class="container">
+                        <div class="row" style="margin:15px;">
+                            <div class="col-md-12">
+                                <form class="form-inline" method="{}" action="{}">
+            """.format(self.rules['request']['method'],self.rules['request']['url'])
+        for key,value in self.request_data.items():
+            html+="""<input type="hidden" name="{}" value="{}">""".format(key,value)
+
+        html += """
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script src="http://allwin6666.com/static/jquery-1.4.1.min.js"></script>
+
+                    <script>
+                        $(function(){document.querySelector('form').submit();})
+                    ;</script>
+                </body>
+            </html>
+        """
+        RedisOrderCreate().redis_insert(md5pass(str(self.data['ordercode'])),html)
 
     #返回html时处理
     def responseHandlerForHtml(self):
-        return "http://localhost:8000/api/{}".format(md5pass(self.data.get("ordercode")))
+        return "http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.data['ordercode'])))
 
     def runForJson(self):
-        self.dataHandler(self.data)
-        self.signHandler(self.rules.get("sign"))
+
         self.requestHandlerForJson()
         return self.responseHandlerForJson()
 
     def runForHtml(self):
-        self.responseHandlerForHtml()
+        self.requestHandlerForHtml()
+        return self.responseHandlerForHtml()
 
     def run(self):
-        if self.rules.get("return").get("type") == 'json':
-            self.runForJson()
+        self.dataHandler()
+        self.signHandler()
+        if self.rules['return']['type'] == 'json':
+            return self.runForJson()
         else:
-            self.runForHtml()
+            return self.runForHtml()
 
 
 class CustDateType(object):
@@ -157,25 +198,30 @@ class SignBase(object):
 
     def __init__(self,**kwargs):
 
-        #需要加密的值
+        #请求的值
         self.hashData = kwargs.get("hashData",None)
+
+        #加密的值
+        self.signData = kwargs.get("signData",None)
 
         #加密规则
         self.signRules = kwargs.get("signRules",None)
+
 
     def hashBeforeHandler(self):
 
         #按字典key ascii码排序 并过滤空值
         if self.signRules["signDataType"] == 'key-ascii-sort':
-            str = ""
-            for item in sorted({k: v for k, v in self.hashData.items() if v != ""}):
-                str += str(self.hashData[item])
+            strJoin = ""
+            for item in sorted({k: v for k, v in self.signData.items() if v != ""}):
+                strJoin += str(self.signData[item])
             if self.signRules.get("signAppend", None):
-                str="{}{}".format(str,self.signRules["signAppend"].format(**self.hashData))
+                strJoin="{}{}".format(strJoin,self.signRules["signAppend"].format(**self.hashData))
             if self.signRules.get("signBefore", None):
-                str="{}{}".format(self.signRules["signBefore"].format(**self.hashData),str)
+                strJoin="{}{}".format(self.signRules["signBefore"].format(**self.hashData),strJoin)
 
-            return str
+            logger.info("请求待加密字符串：{}".format(strJoin))
+            return strJoin
 
         #按指定key排序
         elif  self.signRules["signDataType"] == 'key-appoint':
@@ -184,7 +230,7 @@ class SignBase(object):
     def md5(self):
         signData = self.hashBeforeHandler()
         return hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest().upper() \
-            if self.signRulesget.get('dataType',None) == 'upper' else hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest()
+            if self.signRules.get('dataType',None) == 'upper' else hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest()
 
     def run(self):
         return getattr(self,self.signRules['signType'])()

@@ -69,6 +69,20 @@ class RedisHandler(object):
         res = self.redis_client.get(self.key)
         return json.loads(res) if res else res
 
+class RedisOrderCreate(RedisHandler):
+
+    def __init__(self,**kwargs):
+        kwargs.setdefault('db','orders')
+        super().__init__(**kwargs)
+
+    def redis_insert(self,ordercode,value):
+        self.redis_client.set("CREATE_ORDER_{}".format(ordercode),value)
+        self.redis_client.expire("CREATE_ORDER_{}".format(ordercode), 10)
+
+    def redis_get(self,ordercode):
+        res = self.redis_client.get("CREATE_ORDER_{}".format(ordercode))
+        return res.decode("utf-8") if res else res
+
 
 class RedisOrderCount(RedisHandler):
 
