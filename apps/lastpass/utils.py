@@ -5322,7 +5322,7 @@ class LastPass_GCPAYS(LastPassBase):
             raise PubErrorCustom(res.get("msg"))
 
         if not res.get("data",None):
-            raise PubErrorCustom("支付失败!")
+            return (2,"支付失败")
 
         if str(res.get("data").get("payStatus")) == '0':
             return (0,"支付中")
