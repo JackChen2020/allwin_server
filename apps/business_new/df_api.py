@@ -323,7 +323,7 @@ class daifuCallBack(object):
                     result = requestHandler(method="POST", url="http://allwin6666.com/api_new/business/DF_chongzheng",
                                             data={"row": redisRes})
                     result = json.loads(result.content.decode('utf-8'))
-
+                    logger.info(result)
                     if str(result['rescode']) != '0000':
                         logger.info(result['msg'])
                         self.redis_client.lpush(self.lKey,
@@ -332,6 +332,7 @@ class daifuCallBack(object):
                         time.sleep(1)
                     continue
             except Exception as e:
+                logger.info("Exception")
                 logger.info(str(e))
                 self.redis_client.lpush(self.lKey,"{}|{}|{}|{}|{}|{}".format(userid,amount,ordercode,paypassid,cashout_id,endtime))
                 time.sleep(1)
