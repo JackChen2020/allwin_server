@@ -311,7 +311,7 @@ class daifuCallBack(object):
                 elif str(res.get("data").get("code")) == '1' :
                     result = requestHandler(method="POST",url="http://allwin6666.com/api_new/business/DF_status_save",data={"id":cashout_id})
                     result = json.loads(result.content.decode('utf-8'))
-
+                    print(result)
                     if str(result['rescode']) != '10000':
                         logger.info(result['msg'])
                         self.redis_client.lpush(self.lKey,
