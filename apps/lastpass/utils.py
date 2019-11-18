@@ -4,7 +4,7 @@ from collections import OrderedDict
 import hashlib
 import urllib
 from libs.utils.mytime import UtilTime
-from utils.exceptions import PubErrorCustom
+from libs.utils.exceptions import PubErrorCustom
 from apps.order.models import Order
 from apps.paycall.utils import PayCallLastPass
 from apps.utils import url_join
