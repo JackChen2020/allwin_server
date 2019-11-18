@@ -38,6 +38,7 @@ class PayPass(models.Model):
 
     paypassid=models.BigAutoField(primary_key=True,verbose_name="渠道ID")
     name = models.CharField(max_length=60,verbose_name="渠道名称",default='')
+    status = models.CharField(max_length=1, verbose_name="使用状态 0-启用,1-不启用,2-删除", default=1)
     concat = models.CharField(max_length=30,verbose_name="联系人",default="")
     contype = models.CharField(max_length=30,verbose_name="联系方式",default="")
     isdayfu = models.CharField(max_length=1,verbose_name="是否代付,0-是,1-不是",default='1')
