@@ -17,7 +17,7 @@ from libs.utils.exceptions import PubErrorCustom
 
 from apps.order.models import CashoutList
 from apps.user.models import Users
-from apps.business_new.df_api import daifuOrderQuery
+
 from apps.account import AccounRollBackForApiFee,AccountRollBackForApi
 
 

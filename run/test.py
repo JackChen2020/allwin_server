@@ -12,6 +12,7 @@ from django.db import transaction
 django.setup()
 
 from apps.order.models import CashoutList
+from apps.business_new.df_api import daifuOrderQuery
 
 def duizhangDf():
     with transaction.atomic():
