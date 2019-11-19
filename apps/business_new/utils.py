@@ -171,10 +171,10 @@ class CustDateType(object):
     @staticmethod
     def get_amount(obj):
         if obj['unit'] == 'F':
-            return Decimal(str(float(obj['value']) * 100.0)).quantize(Decimal(obj['point'])) if 'point' in obj else obj['value'] * 100
+            return float(Decimal(str(float(obj['value']) * 100.0)).quantize(Decimal(obj['point']))) if 'point' in obj else float(obj['value']) * 100.0
             # return "%.{}lf".format(int(obj['point'])) % (float(obj['value']) * 100.0) if 'point' in obj else float(obj['value']) * 100.0
         elif obj['unit'] == 'Y':
-            return Decimal(str(float(obj['value']))).quantize(Decimal(obj['point'])) if 'point' in obj else obj['value']
+            return float(Decimal(str(float(obj['value']))).quantize(Decimal(obj['point']))) if 'point' in obj else float(obj['value'])
             # return "%.{}lf".format(int(obj['point'])) % (float(obj['value'])) if 'point' in obj else float(obj['value'])
         else:
             raise PubErrorCustom("标志错误!")
