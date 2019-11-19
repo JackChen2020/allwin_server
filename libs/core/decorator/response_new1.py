@@ -42,10 +42,10 @@ class Core_connector_Response_Html:
         @wraps(func)
         def wrapper(outside_self,request,*args, **kwargs):
             try:
-                self.start = time.time()
+                # self.start = time.time()
                 self.__request_validate(request)
                 response=self.__run(func,outside_self,request,*args, **kwargs)
-                self.end=time.time()
+                # self.end=time.time()
                 return response
             except PubErrorCustom as e:
                 print("PubErrorCustom")

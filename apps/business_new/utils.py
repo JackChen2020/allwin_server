@@ -111,7 +111,10 @@ class CreateOrderForLastPass(object):
     #向上游发起请求
     def requestHandlerForHtml(self):
 
+        before = "{% autoescape off %}"
+
         html="""
+
             <html lang="zh-CN"><head>
             <meta charset="utf-8">
             <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -140,7 +143,9 @@ class CreateOrderForLastPass(object):
                     ;</script>
                 </body>
             </html>
+            {% endautoescape %}
         """
+        html = before + html
         RedisOrderCreate().redis_insert(md5pass(str(self.data['ordercode'])),html)
 
     #返回html时处理
