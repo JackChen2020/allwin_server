@@ -121,7 +121,8 @@ class CreateOrder(object):
                                 amount=self.order.amount,
                                 ordercode=self.order.ordercode,
                                 clientIp = self.order.client_ip,
-                                callbackUrl = url_join('/callback_api/lastpass/callback')
+                                callbackUrl = url_join('/callback_api/lastpass/callback'),
+                                returnUrl = url_join("/pay/#/juli")
                             )
             ).run()}
         else:
