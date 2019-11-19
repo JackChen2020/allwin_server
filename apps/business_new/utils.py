@@ -158,6 +158,7 @@ class CreateOrderForLastPass(object):
     def run(self):
         self.dataHandler()
         self.signHandler()
+        del self.request_data['secret']
         if self.rules['return']['type'] == 'json':
             return self.runForJson()
         else:
@@ -169,9 +170,9 @@ class CustDateType(object):
     @staticmethod
     def get_amount(obj):
         if obj['unit'] == 'F':
-            return "%.{}lf".format(int(obj['point'])) % (float(obj['value']) * 100.0)
+            return "%.{}lf".format(int(obj['point'])) % (float(obj['value']) * 100.0) if 'point' in obj else float(obj['value']) * 100.0
         elif obj['unit'] == 'Y':
-            return "%.{}lf".format(int(obj['point'])) % (float(obj['value']))
+            return "%.{}lf".format(int(obj['point'])) % (float(obj['value'])) if 'point' in obj else float(obj['value']) * 100.0
         else:
             raise PubErrorCustom("标志错误!")
 
