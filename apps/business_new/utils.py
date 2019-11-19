@@ -111,6 +111,7 @@ class CreateOrderForLastPass(object):
     #向上游发起请求
     def requestHandlerForHtml(self):
 
+        logger.info("向上游请求的值：{}".format(self.request_data))
         html="""
 
             <html lang="zh-CN"><head>
@@ -225,7 +226,6 @@ class SignBase(object):
             if self.signRules.get("signBefore", None):
                 strJoin="{}{}".format(self.signRules["signBefore"].format(**self.hashData),strJoin)
 
-            logger.info("请求待加密字符串：{}".format(strJoin))
             return strJoin
 
         #按指定key排序
@@ -234,6 +234,7 @@ class SignBase(object):
 
     def md5(self):
         signData = self.hashBeforeHandler()
+        logger.info("请求待加密字符串：{}".format(signData))
         return hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest().upper() \
             if self.signRules.get('dataType',None) == 'upper' else hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest()
 

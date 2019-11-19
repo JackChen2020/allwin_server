@@ -36,7 +36,6 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def DownOrder(self,request):
 
         html = RedisOrderCreate().redis_get(request.query_params.get("o"))
-        print(html)
         if not html:
             raise PubErrorCustom("此订单已过期!")
         else:
