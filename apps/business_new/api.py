@@ -96,7 +96,7 @@ class BusinessNewAPIView(GenericViewSetCustom):
     def DF_status_save(self,request):
         try:
             obj = CashoutList.objects.get(id=request.data.get("id"))
-            obj.df_status = '0'
+            obj.df_status = '1'
             obj.save()
         except CashoutList.DoesNotExist:
             raise PubErrorCustom("无此提现明细!{}".format(request.data.get("id")))
