@@ -1,36 +1,24 @@
+import os
+import sys
+import django
+pathname = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, pathname)
+sys.path.insert(0,os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# print()
 
-from requests import request
-import json
-import hashlib
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "education.settings")
+
+django.setup()
 
 
+from rest_framework import serializers
 
-if __name__ == '__main__':
-    url = "http://localhost:9001/api_new/business/create_order"
-    secret = "4S4G7CBWJHYAD5ZE"
+class Amount:
+    amount = 0
 
-    data=dict(
-        businessid = "5",
-        paytypeid = "1",
-        down_ordercode = "123",
-        amount = 100,
-        client_ip = "192.168.0.1",
-        notifyurl = "http://www.baidu.com",
-        ismobile = "1"
-    )
+class AmountSerializers(serializers.Serializer):
+    amount = serializers.DecimalField(max_digits=18, decimal_places=2)
 
-    encrypted = "{}{}{}{}{}{}{}".format(
-        secret,
-        str(data['businessid']),
-        str(data['paytypeid']),
-        str(data['down_ordercode']),
-        str(data['client_ip']),
-        str(data['amount']),
-        secret
-    ).encode("utf-8")
 
-    data['sign'] = hashlib.md5(encrypted).hexdigest()
-
-    res = request(url=url,data=data,method='POST')
-
-    print(res.text)
+Amount.amount = "123.123"
+print(AmountSerializers(Amount,many=False).data)
