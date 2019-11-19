@@ -77,7 +77,7 @@ class RedisOrderCreate(RedisHandler):
 
     def redis_insert(self,ordercode,value):
         self.redis_client.set("CREATE_ORDER_{}".format(ordercode),value)
-        self.redis_client.expire("CREATE_ORDER_{}".format(ordercode), 10)
+        self.redis_client.expire("CREATE_ORDER_{}".format(ordercode), 60*5)
 
     def redis_get(self,ordercode):
         res = self.redis_client.get("CREATE_ORDER_{}".format(ordercode))
