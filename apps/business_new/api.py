@@ -11,7 +11,7 @@ from apps.business_new.df_api import dfHandler
 from apps.business_new.jd_api import jdHandler
 from apps.lastpass.utils import LastPass_GCPAYS
 from django.shortcuts import render
-
+from django.http import HttpResponse
 from apps.utils import RedisOrderCreate
 from libs.utils.exceptions import PubErrorCustom
 
@@ -40,7 +40,7 @@ class BusinessNewAPIView(GenericViewSetCustom):
         if not html:
             raise PubErrorCustom("此订单已过期!")
         else:
-            return render(request, html)
+            return HttpResponse(html, content_type='text/html')
 
     @list_route(methods=['POST'])
     @Core_connector_DAIFU(transaction=True)
