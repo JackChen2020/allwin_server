@@ -220,7 +220,8 @@ class SignBase(object):
         if self.signRules["signDataType"] == 'key-ascii-sort':
             strJoin = ""
             for item in sorted({k: v for k, v in self.signData.items() if v != ""}):
-                strJoin += str(self.signData[item])
+                strJoin += "{}={}&".format(str(item),str(self.signData[item]))
+            strJoin=strJoin[:-1]
             if self.signRules.get("signAppend", None):
                 strJoin="{}{}".format(strJoin,self.signRules["signAppend"].format(**self.hashData))
             if self.signRules.get("signBefore", None):
