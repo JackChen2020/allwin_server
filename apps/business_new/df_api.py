@@ -229,7 +229,6 @@ class dfHandler(object):
         if float(ok_bal) - abs(float(self.user.cashout_bal)) - float(self.user.fee_rule) < float(self.data.get("amount")):
             raise PubErrorCustom("可提余额不足!")
 
-
         request=dict()
 
         request["paypassid"] = self.paypasslinktype.passid
@@ -239,6 +238,21 @@ class dfHandler(object):
         request["bank_card_number"] = self.data.get("accountNo")
         request["downordercode"] = self.data.get('down_ordercode')
         request["memo"] = self.data.get("memo")
+
+
+        #单笔不允许超过50000
+        if request["amount"] - 50000.0 > 0.0:
+            raise PubErrorCustom("单笔下发不能超过50000,当前金额{}".format(request["amount"]))
+
+        #3次内同一用户同一账户金额不能相同
+        res = CashoutList.objects.filter(userid=self.user.userid,bank_card_number=request["bank_card_number"],df_status='1').order_by("-createtime")
+        if res.count() > 3:
+            res = res[:3]
+
+        for item in res:
+            if request["amount"] == float(item.amount):
+                raise PubErrorCustom("3次内同一银行卡下发金额不能相同！")
+
 
         cashout_id = daifuBalTixian(request,self.user)
 
