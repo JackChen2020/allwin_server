@@ -161,7 +161,10 @@ class CreateOrderForLastPass(object):
     def run(self):
         self.dataHandler()
         self.signHandler()
-        del self.request_data['secret']
+        if "secret" in self.request_data:
+            del self.request_data['secret']
+        if "key" in self.request_data:
+            del self.request_data['key']
         if self.rules['return']['type'] == 'json':
             return self.runForJson()
         else:
