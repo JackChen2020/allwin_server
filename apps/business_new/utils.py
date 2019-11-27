@@ -267,7 +267,13 @@ class PassBase(object):
 
         # 按指定key排序
         elif self.signRules["signDataType"] == 'key-appoint':
-            return self.signRules["signValue"].format(**self.hashData)
+            strJoin = self.signRules["signValue"].format(**self.hashData)
+            if self.signRules.get("signAppend", None):
+                strJoin = "{}{}".format(strJoin, self.signRules["signAppend"].format(**self.hashData))
+            if self.signRules.get("signBefore", None):
+                strJoin = "{}{}".format(self.signRules["signBefore"].format(**self.hashData), strJoin)
+
+            return strJoin
 
     def aesPass(self):
         signData = self.hashBeforeHandler()
