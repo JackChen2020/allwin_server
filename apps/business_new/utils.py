@@ -290,7 +290,7 @@ class PassBase(object):
 
         res = AES.new(key=self.signRules['Gpass'],mode=AES.MODE_CBC,iv=self.signRules['cheap'])
 
-        res = res.encrypt(a)
+        res = res.encrypt(a.encode('utf-8'))
         return base64.b64encode(res) if self.signRules['Pout'] == 'base64' else res.hex()
 
     def pkcs5padding(self,s):
