@@ -1,8 +1,14 @@
 
 import hashlib
 import json
-from decimal import Decimal
+import base64
+
 from requests import request
+
+from Crypto.Cipher import AES
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5
+from Crypto.Hash import SHA
 
 from libs.utils.exceptions import PubErrorCustom
 from libs.utils.mytime import UtilTime
@@ -25,8 +31,14 @@ class CreateOrderForLastPass(object):
         #请求数据
         self.request_data = {}
 
+        #确定请求的字典key集合
+        self.request_keys = []
+
         #参加签名数据
         self.request_data_sign = {}
+
+        #参加加密的数据
+        self.request_data_pass = {}
 
         #返回数据
         self.response = None
@@ -41,6 +53,30 @@ class CreateOrderForLastPass(object):
             self.request_data[item['key']] = res
             if item.get("sign",None) :
                 self.request_data_sign[item['key']] = res
+
+            if item.get("password",None) :
+                self.request_data_pass[item['key']] = res
+
+            if 'requestOk' in item and item['requestOk']:
+                self.request_keys.append(item['key'])
+
+        self.request_keys.append(self.rules['password']['signKey'])
+        self.request_keys.append(self.rules['sign']['signKey'])
+
+    def reuquestBeforeDataHandler(self):
+        for key in self.request_data:
+            if key not in self.request_keys:
+                del self.request_data[key]
+
+    #加密
+    def passHandler(self):
+        password = PassBase(
+            hashData=self.request_data,
+            signData=self.request_data_pass,
+            signRules=self.rules['password']
+        ).run()
+
+        self.request_data[self.rules['password']['signKey']] = password
 
     #签名
     def signHandler(self):
@@ -161,10 +197,10 @@ class CreateOrderForLastPass(object):
     def run(self):
         self.dataHandler()
         self.signHandler()
-        if "secret" in self.request_data:
-            del self.request_data['secret']
-        if "key" in self.request_data:
-            del self.request_data['key']
+        # if "secret" in self.request_data:
+        #     del self.request_data['secret']
+        # if "key" in self.request_data:
+        #     del self.request_data['key']
         if self.rules['return']['type'] == 'json':
             return self.runForJson()
         else:
@@ -203,6 +239,53 @@ class CustDateType(object):
     def get_int(obj):
         return int(obj.get("value"))
 
+class PassBase(object):
+    def __init__(self,**kwargs):
+
+        #请求的值
+        self.hashData = kwargs.get("hashData",None)
+
+        #加密的值
+        self.signData = kwargs.get("signData",None)
+
+        #加密规则
+        self.signRules = kwargs.get("signRules",None)
+
+        def hashBeforeHandler(self):
+
+            # 按字典key ascii码排序(key-value) 并过滤空值
+            if self.signRules["signDataType"] == 'key-ascii-sort':
+                strJoin = ""
+                for item in sorted({k: v for k, v in self.signData.items() if v != ""}):
+                    strJoin += "{}={}&".format(str(item), str(self.signData[item]))
+                strJoin = strJoin[:-1]
+                if self.signRules.get("signAppend", None):
+                    strJoin = "{}{}".format(strJoin, self.signRules["signAppend"].format(**self.hashData))
+                if self.signRules.get("signBefore", None):
+                    strJoin = "{}{}".format(self.signRules["signBefore"].format(**self.hashData), strJoin)
+
+                return strJoin
+
+            # 按指定key排序
+            elif self.signRules["signDataType"] == 'key-appoint':
+                return self.signRules["signValue"].format(**self.hashData)
+
+    def aesPass(self):
+        signData = self.hashBeforeHandler()
+        logger.info("请求待加密字符串：{}".format(signData))
+
+        res = AES.new(key=self.signRules['Gpass'],mode=AES.MODE_CBC,iv=self.signRules['cheap']).\
+            encrypt(getattr(self, self.signRules['signDataType'])(signData))
+        return base64.b64encode(res) if self.signRules['Pout'] == 'base64' else res.hex()
+
+    def pkcs5padding(self,s):
+        aes_len = AES.block_size
+        return s + (aes_len - len(s) % aes_len) * chr(aes_len - len(s) % aes_len)
+
+
+    def run(self):
+        return getattr(self,self.signRules['signType'])()
+
 class SignBase(object):
 
     def __init__(self,**kwargs):
@@ -219,7 +302,7 @@ class SignBase(object):
 
     def hashBeforeHandler(self):
 
-        #按字典key ascii码排序 并过滤空值
+        #按字典key ascii码排序(key-value) 并过滤空值
         if self.signRules["signDataType"] == 'key-ascii-sort':
             strJoin = ""
             for item in sorted({k: v for k, v in self.signData.items() if v != ""}):
@@ -238,9 +321,15 @@ class SignBase(object):
 
     def md5(self):
         signData = self.hashBeforeHandler()
-        logger.info("请求待加密字符串：{}".format(signData))
+        logger.info("请求待签名字符串：{}".format(signData))
         return hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest().upper() \
             if self.signRules.get('dataType',None) == 'upper' else hashlib.md5(signData.encode(self.signRules['signEncode'])).hexdigest()
+
+    def rsa_ecb_pkcs1padding(self):
+        signData = self.hashBeforeHandler()
+        logger.info("请求待签名字符串：{}".format(signData))
+        self.signRules['Spass'] = "-----BEGIN RSA PRIVATE KEY-----\n" + self.signRules['Spass'] + "\n-----END RSA PRIVATE KEY-----"
+        return base64.b64encode(PKCS1_v1_5.new(RSA.importKey(self.signRules['Spass'])).sign(SHA.new(signData.encode("utf-8"))))
 
     def run(self):
         return getattr(self,self.signRules['signType'])()
