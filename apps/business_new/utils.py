@@ -250,24 +250,24 @@ class PassBase(object):
         #加密规则
         self.signRules = kwargs.get("signRules",None)
 
-        def hashBeforeHandler(self):
+    def hashBeforeHandler(self):
 
-            # 按字典key ascii码排序(key-value) 并过滤空值
-            if self.signRules["signDataType"] == 'key-ascii-sort':
-                strJoin = ""
-                for item in sorted({k: v for k, v in self.signData.items() if v != ""}):
-                    strJoin += "{}={}&".format(str(item), str(self.signData[item]))
-                strJoin = strJoin[:-1]
-                if self.signRules.get("signAppend", None):
-                    strJoin = "{}{}".format(strJoin, self.signRules["signAppend"].format(**self.hashData))
-                if self.signRules.get("signBefore", None):
-                    strJoin = "{}{}".format(self.signRules["signBefore"].format(**self.hashData), strJoin)
+        # 按字典key ascii码排序(key-value) 并过滤空值
+        if self.signRules["signDataType"] == 'key-ascii-sort':
+            strJoin = ""
+            for item in sorted({k: v for k, v in self.signData.items() if v != ""}):
+                strJoin += "{}={}&".format(str(item), str(self.signData[item]))
+            strJoin = strJoin[:-1]
+            if self.signRules.get("signAppend", None):
+                strJoin = "{}{}".format(strJoin, self.signRules["signAppend"].format(**self.hashData))
+            if self.signRules.get("signBefore", None):
+                strJoin = "{}{}".format(self.signRules["signBefore"].format(**self.hashData), strJoin)
 
-                return strJoin
+            return strJoin
 
-            # 按指定key排序
-            elif self.signRules["signDataType"] == 'key-appoint':
-                return self.signRules["signValue"].format(**self.hashData)
+        # 按指定key排序
+        elif self.signRules["signDataType"] == 'key-appoint':
+            return self.signRules["signValue"].format(**self.hashData)
 
     def aesPass(self):
         signData = self.hashBeforeHandler()
