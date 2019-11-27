@@ -288,7 +288,7 @@ class PassBase(object):
         res = AES.new(key=self.signRules['Gpass'].encode('utf-8'),mode=AES.MODE_CBC,iv=self.signRules['cheap'].encode('utf-8')). \
                     encrypt(getattr(self, self.signRules['tianchong'])(signData).encode('utf-8'))
 
-        return str(base64.b64encode(res) if self.signRules['Pout']) == 'base64' else str(res.hex())
+        return str(base64.b64encode(res)) if self.signRules['Pout'] == 'base64' else str(res.hex())
 
     def pkcs5padding(self,s):
         aes_len = AES.block_size
