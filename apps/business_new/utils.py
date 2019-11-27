@@ -341,7 +341,7 @@ class SignBase(object):
         signData = self.hashBeforeHandler()
         logger.info("请求待签名字符串：{}".format(signData))
         self.signRules['Spass'] = "-----BEGIN RSA PRIVATE KEY-----\n" + self.signRules['Spass'] + "\n-----END RSA PRIVATE KEY-----"
-        return base64.b64encode(PKCS1_v1_5.new(RSA.importKey(self.signRules['Spass'])).sign(SHA.new(signData.encode("utf-8"))))
+        return str(base64.b64encode(PKCS1_v1_5.new(RSA.importKey(self.signRules['Spass'])).sign(SHA.new(signData.encode("utf-8")))),'utf-8')
 
     def run(self):
         return getattr(self,self.signRules['signType'])()
