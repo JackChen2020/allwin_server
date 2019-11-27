@@ -275,12 +275,16 @@ class PassBase(object):
 
             return strJoin
 
+        # 按json字符串
+        elif self.signRules["signDataType"] == 'key-json':
+            return json.dumps(self.hashData, ensure_ascii=False)
+
     def aesPass(self):
         signData = self.hashBeforeHandler()
         logger.info("请求待加密字符串：{}".format(signData))
 
         res = AES.new(key=self.signRules['Gpass'],mode=AES.MODE_CBC,iv=self.signRules['cheap']).\
-            encrypt(getattr(self, self.signRules['signDataType'])(signData))
+            encrypt(getattr(self, self.signRules['tianchong'])(signData))
         return base64.b64encode(res) if self.signRules['Pout'] == 'base64' else res.hex()
 
     def pkcs5padding(self,s):
