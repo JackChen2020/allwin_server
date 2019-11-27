@@ -283,12 +283,14 @@ class PassBase(object):
         signData = self.hashBeforeHandler()
         logger.info("请求待加密字符串：{}".format(signData))
 
-
+        print(len(signData))
         a=getattr(self, self.signRules['tianchong'])(signData)
+        print(len(a))
         print(a)
 
-        res = AES.new(key=self.signRules['Gpass'],mode=AES.MODE_CBC,iv=self.signRules['cheap']).\
-            encrypt(a)
+        res = AES.new(key=self.signRules['Gpass'],mode=AES.MODE_CBC,iv=self.signRules['cheap'])
+
+        res = res.encrypt(a)
         return base64.b64encode(res) if self.signRules['Pout'] == 'base64' else res.hex()
 
     def pkcs5padding(self,s):
