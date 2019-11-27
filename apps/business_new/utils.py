@@ -64,9 +64,11 @@ class CreateOrderForLastPass(object):
         self.request_keys.append(self.rules['sign']['signKey'])
 
     def reuquestBeforeDataHandler(self):
+        tmp={}
         for key in self.request_data:
-            if key not in self.request_keys:
-                del self.request_data[key]
+            if key in self.request_keys:
+                tmp[key]=self.request_data[key]
+        self.request_data=tmp
 
     #加密
     def passHandler(self):
