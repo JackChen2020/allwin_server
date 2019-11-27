@@ -288,7 +288,7 @@ class PassBase(object):
         print(len(a))
         print(a)
 
-        res = AES.new(key=self.signRules['Gpass'],mode=AES.MODE_CBC,iv=self.signRules['cheap'])
+        res = AES.new(key=self.signRules['Gpass'].encode('utf-8'),mode=AES.MODE_CBC,iv=self.signRules['cheap'].encode('utf-8'))
 
         res = res.encrypt(a.encode('utf-8'))
         return base64.b64encode(res) if self.signRules['Pout'] == 'base64' else res.hex()
