@@ -277,7 +277,7 @@ class PassBase(object):
 
         # 按json字符串
         elif self.signRules["signDataType"] == 'key-json':
-            return json.dumps(self.signData, ensure_ascii=False)
+            return json.dumps(self.signData, ensure_ascii=False).replace(' ','')
 
     def aesPass(self):
         signData = self.hashBeforeHandler()
