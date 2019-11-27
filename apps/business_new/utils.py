@@ -76,6 +76,7 @@ class CreateOrderForLastPass(object):
             signRules=self.rules['password']
         ).run()
 
+        self.request_data_sign[self.rules['password']['signKey']] = password
         self.request_data[self.rules['password']['signKey']] = password
 
     #签名
@@ -196,11 +197,9 @@ class CreateOrderForLastPass(object):
 
     def run(self):
         self.dataHandler()
+        self.passHandler()
         self.signHandler()
-        # if "secret" in self.request_data:
-        #     del self.request_data['secret']
-        # if "key" in self.request_data:
-        #     del self.request_data['key']
+        self.reuquestBeforeDataHandler()
         if self.rules['return']['type'] == 'json':
             return self.runForJson()
         else:
@@ -226,7 +225,7 @@ class CustDateType(object):
             return obj.get("value")
         else:
             ut = UtilTime()
-            return ut.timestamp \
+            return ut.timestamp * 1000 \
                 if obj.get("format", None) == 'timestamp' else \
                 ut.arrow_to_string(arrow_s=ut.today, format_v=obj.get("format", None)) if obj.get("format", None) \
                     else ut.arrow_to_string(arrow_s=ut.today)
