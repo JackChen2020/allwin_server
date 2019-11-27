@@ -100,7 +100,7 @@ class CreateOrderForLastPass(object):
             "type":"json",
         },
         """
-        logger.info("向上游请求的值：{}".format(self.request_data))
+        logger.info("向上游请求的值：{}".format(json.dumps(self.request_data)))
         if self.rules.get("request").get("type") == 'json':
             result = request(
                 url=self.rules.get("request").get("url"),
@@ -127,7 +127,7 @@ class CreateOrderForLastPass(object):
 
         try :
             self.response = json.loads(result.content.decode('utf-8'))
-            logger.info("上游返回值：{}".format(self.response))
+            logger.info("上游返回值：{}".format(result.content.decode('utf-8')))
         except Exception as e:
             raise PubErrorCustom("返回JSON错误!{}".format(result.text))
 
