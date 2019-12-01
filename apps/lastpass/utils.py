@@ -5442,7 +5442,9 @@ class LastPass_WEIFU(LastPassBase):
         print(s)
         data['sign']=md5pass(s).upper()
         print(data)
-        result = request(method='POST', url="http://api.jinxiangweb.cn:8888/api/v1/getAccessToken/merchant", data=data, verify=False)
+        result = request(method='POST', url="http://api.jinxiangweb.cn:8888/api/v1/getAccessToken/merchant", json=data, verify=False,headers={
+            "Content-Type":'application/json'
+        })
         print(result.text)
         response = json.loads(result.content.decode('utf-8'))
         if response['success']:
