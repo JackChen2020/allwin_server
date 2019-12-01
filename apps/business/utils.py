@@ -119,7 +119,7 @@ class CreateOrder(object):
 
             token = None
 
-            if self.paypasslinktype.passid == '74':
+            if str(self.paypasslinktype.passid) == '74':
                 token = LastPass_WEIFU().get_token()
 
             return {"path": CreateOrderForLastPass(
