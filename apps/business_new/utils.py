@@ -26,6 +26,9 @@ class CreateOrderForLastPass(object):
         #传入数据
         self.data = kwargs.get("data",None)
 
+        #渠道ID
+        self.passid = kwargs.get("passid",None)
+
         logger.info("规则：{}".format(self.rules))
 
         #请求数据
@@ -69,6 +72,12 @@ class CreateOrderForLastPass(object):
             if key in self.request_keys:
                 tmp[key]=self.request_data[key]
         self.request_data=tmp
+
+        data={}
+        if self.passid == 74:
+            data['accessToken'] = self.request_data['accessToken']
+            data['param'] = self.request_data
+            self.request_data = data
 
     #加密
     def passHandler(self):

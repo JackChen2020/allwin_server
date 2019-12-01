@@ -123,15 +123,16 @@ class CreateOrder(object):
                 token = LastPass_WEIFU().get_token()
 
             return {"path": CreateOrderForLastPass(
-                                rules = json.loads(self.paypasslinktype.rules),
-                                data = dict(
-                                amount=self.order.amount,
-                                ordercode=self.order.ordercode,
-                                clientIp = self.order.client_ip,
-                                callbackUrl = url_join('/callback_api/lastpass/callback'),
-                                returnUrl = url_join("/pay/#/juli"),
-                                token = token
-                            )
+                    rules = json.loads(self.paypasslinktype.rules),
+                    passid = self.paypasslinktype.passid,
+                    data = dict(
+                        amount=self.order.amount,
+                        ordercode=self.order.ordercode,
+                        clientIp = self.order.client_ip,
+                        callbackUrl = url_join('/callback_api/lastpass/callback'),
+                        returnUrl = url_join("/pay/#/juli"),
+                        token = token
+                    )
             ).run()}
         else:
             # 傲银支付
