@@ -18,7 +18,7 @@ from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
                     LastPass_MIFENG,LastPass_TIGER,LastPass_GUAISHOU,LastPass_DINGSHENG,LastPass_CZKJ,LastPass_SBGM,LastPass_XINGHE,LastPass_YUANLAI,\
                         LastPass_JINGSHA,LastPass_ANJIE,LastPass_hahapay,LastPass_SHUIJING,LastPass_KUAIJIE,LastPass_ALLWIN,LastPass_SHUIJING_NEW,LastPass_BAWANGKUAIJIE,\
                             LastPass_YANXINGZHIFU,LastPass_JINGDONG,LastPass_JIAHUI,LastPass_ZHONGXING,LastPass_ZHAOXING,LastPass_TIANCHENG,LastPass_IPAYZHIFUBAO,LastPass_YSLH, \
-                                LastPass_HUIHUANG,LastPass_JUXINGNEW,LastPass_LONGSHI
+                                LastPass_HUIHUANG,LastPass_JUXINGNEW,LastPass_LONGSHI,LastPass_WEIFU
 
 class CreateOrder(object):
 
@@ -115,6 +115,13 @@ class CreateOrder(object):
 
 
         if self.paypasslinktype.custom=='1':
+
+
+            token = None
+
+            if self.paypasslinktype.passid == '74':
+                token = LastPass_WEIFU().get_token()
+
             return {"path": CreateOrderForLastPass(
                                 rules = json.loads(self.paypasslinktype.rules),
                                 data = dict(
@@ -122,7 +129,8 @@ class CreateOrder(object):
                                 ordercode=self.order.ordercode,
                                 clientIp = self.order.client_ip,
                                 callbackUrl = url_join('/callback_api/lastpass/callback'),
-                                returnUrl = url_join("/pay/#/juli")
+                                returnUrl = url_join("/pay/#/juli"),
+                                token = token
                             )
             ).run()}
         else:

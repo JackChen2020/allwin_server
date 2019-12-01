@@ -5415,6 +5415,47 @@ class LastPass_GCPAYS(LastPassBase):
             # if result.text != 'success':
             #     print("请求对方服务器错误{}:{}".format(str(result.text), ordercode))
 
+class LastPass_WEIFU(LastPassBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+        self.secret = "8a40d47c8218481a9cdf540a46a8c1cc"
+        self.businessId = "JXM000000000000107"
+        self.token= None
+
+        self.response = None
+
+    def get_token(self):
+        t = UtilTime().timestamp
+        data=dict(
+            merchantNo = self.businessId,
+            key =self.secret,
+            nonce = str(t),
+            timestamp = t
+        )
+        s = "merchantNo={}&nonce={}&timestamp={}&key={}".format(
+            data['merchantNo'],
+            data['nonce'],
+            str(data['timestamp']),
+            data['key'],
+        )
+        print(s)
+        data['sign']=md5pass(s).upper()
+        print(data)
+        result = request(method='POST', url="http://api.jinxiangweb.cn:8888/api/v1/getAccessToken/merchant", data=data, verify=False)
+        print(result.text)
+        response = json.loads(result.content.decode('utf-8'))
+        if response['success']:
+            self.token = response['value']['accessToken']
+        else:
+            raise PubErrorCustom(response['message'])
+
+        if not self.token :
+            raise PubErrorCustom("token获取失败！")
+
+        return self.token
+
+
 
 if __name__=="__main__":
 

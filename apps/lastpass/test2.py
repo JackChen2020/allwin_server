@@ -117,6 +117,62 @@ class TestDf(object):
         self.data.setdefault("sign", hashlib.md5(md5params).hexdigest())
         return self._request("http://allwin6666.com/api_new/business/df")
 
+
+class LastPass_WEIFU(LastPassBase):
+    def __init__(self,**kwargs):
+        super().__init__(**kwargs)
+
+        self.secret = "8a40d47c8218481a9cdf540a46a8c1cc"
+        self.businessId = "JXM000000000000107"
+        self.token= None
+
+        self.response = None
+
+    def get_token(self):
+        t = UtilTime().timestamp
+        data=dict(
+            merchantNo = self.businessId,
+            key =self.secret,
+            nonce = str(t),
+            timestamp = t
+        )
+        s = "merchantNo={}&nonce={}&timestamp={}&key={}".format(
+            data['merchantNo'],
+            data['nonce'],
+            str(data['timestamp']),
+            data['key'],
+        )
+        print(s)
+        data['sign']=md5pass(s).upper()
+        print(data)
+        result = request(method='POST', url="http://api.jinxiangweb.cn:8888/api/v1/getAccessToken/merchant", data=data, verify=False)
+        print(result.text)
+        response = json.loads(result.content.decode('utf-8'))
+        if response['success']:
+            self.token = response['value']['accessToken']
+
+
+    # def run(self):
+    #     self.data.setdefault('mchId',self.businessId)
+    #     self.data.setdefault('appId',self.appId)
+    #
+    #
+    #     self.data.setdefault('currency','cny')
+    #
+    #     # self.data.setdefault('productId', self.productId)
+    #     self.data.setdefault('subject','商品P')
+    #     self.data.setdefault('body', '商品P6666')
+    #
+    #     # self.data.setdefault('pay_bankcode',"904")
+    #     self._sign()
+    #
+    #     try:
+    #         self._request()
+    #         print(self.response)
+    #         return (False, self.response['retMsg']) if self.response['retCode']!='SUCCESS' else (True,self.response['payParams']['payUrl'])
+    #     except Exception as e:
+    #         return (False,str(e))
+
 if __name__ == '__main__':
 
     testDfClass = TestDf()
