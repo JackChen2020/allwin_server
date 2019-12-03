@@ -8,6 +8,8 @@ from apps.public.models import QrCodeLinkPayType
 from libs.utils.mytime import timestamp_toDatetime,datetime_toTimestamp
 from apps.utils import url_join
 from apps.pay.models import PayType,PayPassLinkType
+from libs.utils.string_extension import md5pass
+from apps.utils import RedisOrderCreate
 from apps.business.weibo import woboBase
 
 from apps.business_new.utils import CreateOrderForLastPass
@@ -143,6 +145,30 @@ class CreateOrder(object):
 
                 res = woboBase(amount=int(float(self.order.amount)),num=num).run()
                 print(res)
+
+                html = """
+                    <!DOCTYPE HTML>
+                    <html>
+                        <head>
+                            <meta charset="utf-8">
+                            <title>AllWinPay</title>
+                        </head>
+                        <body>
+                            <form action="https://openapi.alipay.com/gateway.do?charset=UTF-8" method="POST" id="alipayForm">
+                    """
+                for key, value in res.items():
+                    html += """<input type="hidden" name="{}" value="{}">""".format(key, value)
+
+                    html += """
+                            </form>
+                        <script>
+                            document.getElementById('alipayForm').submit();
+                        </script>
+                        </body>
+                    </html>
+                    """
+                RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
+                return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
 
             #聚力支付
             elif str(self.paypasslinktype.passid) == '4':

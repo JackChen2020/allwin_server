@@ -5,6 +5,7 @@ import urllib3
 import json
 
 from urllib.parse import unquote
+from libs.utils.exceptions import PubErrorCustom
 
 urllib3.disable_warnings() # 取消警告
 
@@ -116,7 +117,15 @@ class woboBase(object):
             'User-Agent': 'iOS__iPhone__iOS__12.4.1__828*1792__iPhone11,8__arm64e__0__9.11.2__2.0.0',
         }
         try:
-            return json.loads(request(method="POST", url=url, headers=headers, data=data, verify=False).content.decode('utf-8'))
+            res =  json.loads(request(method="POST", url=url, headers=headers, data=data, verify=False).content.decode('utf-8'))
+            if res['code'] != "100000":
+                raise PubErrorCustom("{}，请联系技术人员".format(res['msg']))
+
+            params = unquote(res['data'], 'utf-8')
+            data = {}
+            for item in params.split("&"):
+                data[item.split("=")[0]] = item.split("=")[1]
+            return data
         except Exception as e:
             print("createOrderForAliPay Error ： {}".format(str(e)))
 
