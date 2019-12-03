@@ -121,6 +121,7 @@ class woboBase(object):
             if res['code'] != "100000":
                 raise PubErrorCustom("{}，请联系技术人员".format(res['msg']))
 
+            print(res)
             params = unquote(res['data'], 'utf-8')
             data = {}
             for item in params.split("&"):
