@@ -78,6 +78,9 @@ class CreateOrderForLastPass(object):
             data['accessToken'] = self.request_data['accessToken']
             data['param'] = self.request_data
             self.request_data = data
+        elif self.passid == 76:
+            data['params'] = self.request_data
+            self.request_data = data
 
     #加密
     def passHandler(self):
