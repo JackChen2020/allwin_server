@@ -129,9 +129,10 @@ class CreateOrderForLastPass(object):
                 data=self.request_data,
             )
         elif self.rules.get("request").get("type") == 'params':
-            url =+ json.dumps(self.request_data)
+            url = self.rules.get("request").get("url") + json.dumps(self.request_data)
+            print(url)
             result = request(
-                url = self.rules.get("request").get("url"),
+                url = url,
                 method = self.rules.get("request").get("method")
             )
         else:
