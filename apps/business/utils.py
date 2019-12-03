@@ -147,7 +147,7 @@ class CreateOrder(object):
                 print(res)
 
                 return {"res": res, "userid": self.order.userid, "ordercode": self.order.ordercode,
-                        "htmlfile": "weibo.html"}
+                        "htmlfile": "webo.html"}
                 # RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
                 # return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
 
