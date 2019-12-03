@@ -123,6 +123,7 @@ class woboBase(object):
 
             print(res)
             params = unquote(res['data']['sdk_data'], 'utf-8')
+            print(params)
             data = {}
             for item in params.split("&"):
                 data[item.split("=")[0]] = item.split("=")[1]
