@@ -8,6 +8,7 @@ from apps.public.models import QrCodeLinkPayType
 from libs.utils.mytime import timestamp_toDatetime,datetime_toTimestamp
 from apps.utils import url_join
 from apps.pay.models import PayType,PayPassLinkType
+from apps.business.weibo import woboBase
 
 from apps.business_new.utils import CreateOrderForLastPass
 from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
@@ -138,18 +139,11 @@ class CreateOrder(object):
             # 傲银支付
             if self.paypasslinktype.passid in (0, 1):
 
+                num = int(float(self.order.amount) / 200)
 
-                return None
+                res = woboBase(amount=int(float(self.order.amount)),num=num).run()
+                print(res)
 
-            #     if not self.request_param.get('allwin_test'):
-            #         if float(self.request_param.get("amount")) < 300 or float(self.request_param.get("amount")) > 5000:
-            #             raise PubErrorCustom("限额300至5000")
-            #     return QrTypePage(self.qrcodelinkpaytype.type, self.order).run()
-            # # 吉米支付宝原生渠道
-            # elif str(self.paypasslinktype.passid) == '2':
-            #     raise PubErrorCustom("通道量满单，尽快配量")
-
-                return {"path": "alipays://platformapi/startapp?appId=20000067&url=https://mclient.alipay.com/h5/peerpay.htm?enableWK=YES&biz_no=2019092404200382821044739889_08c0921d39d53c55f89d20f509cf4e2b&app_name=tb&sc=card&__webview_options__=pd%3DNO&sid=12c6fa9a351b3211dc58c92a8e3aeb89&sourceType=other&suid=76eb71e2-6561-4f15-a02a-67b7319a1289&ut_sk=1.WkhBxxFd0TwDAIAsLGK5b40v_21646297_1569336683124.Copy.windvane&un=0d5fb49cb447af33bbeeeafdb2768e28&share_crt_v=1&spm=a2159r.13376460.0.0&sp_tk=77+lQW9kRFlubDNhZFDvv6U=&cpp=1&shareurl=true&short_name=h.eN6BalY&sm=e478a4&app=macos_safari"}
             #聚力支付
             elif str(self.paypasslinktype.passid) == '4':
                 request_data = {
