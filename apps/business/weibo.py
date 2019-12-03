@@ -122,7 +122,7 @@ class woboBase(object):
                 raise PubErrorCustom("{}，请联系技术人员".format(res['msg']))
 
             print(res)
-            params = unquote(res['data'], 'utf-8')
+            params = unquote(res['data']['sdk_data'], 'utf-8')
             data = {}
             for item in params.split("&"):
                 data[item.split("=")[0]] = item.split("=")[1]
