@@ -129,10 +129,10 @@ class CreateOrderForLastPass(object):
                 data=self.request_data,
             )
         elif self.rules.get("request").get("type") == 'params':
+            url =+ json.dumps(self.request_data)
             result = request(
                 url = self.rules.get("request").get("url"),
-                method = self.rules.get("request").get("method"),
-                params=self.request_data,
+                method = self.rules.get("request").get("method")
             )
         else:
             raise PubErrorCustom("请求参数错误!")
