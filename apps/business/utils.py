@@ -10,7 +10,7 @@ from apps.utils import url_join
 from apps.pay.models import PayType,PayPassLinkType
 from libs.utils.string_extension import md5pass
 from apps.utils import RedisOrderCreate
-from apps.business.weibo import woboBase
+from apps.business.weibo import WeiboHbPay
 
 from apps.business_new.utils import CreateOrderForLastPass
 from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
@@ -143,13 +143,15 @@ class CreateOrder(object):
 
                 num = int(float(self.order.amount) / 200)
 
-                res = woboBase(amount=int(float(self.order.amount)),num=num).run()
-                print(res)
-
-                return {"res": res, "userid": self.order.userid, "ordercode": self.order.ordercode,
-                        "htmlfile": "webo.html"}
-                # RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
-                # return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
+                html = WeiboHbPay(
+                    username="17623069111",
+                    password="!@#tc123",
+                    gsid="_2A25w42jBDeRxGeBK6VYZ9S3JzzWIHXVRufsJrDV6PUJbkdANLVn7kWpNR848UD1sYIUKuVtFVB3UFF3F9vWxNkJI",
+                    amount=int(float(self.order.amount)),
+                    num=num).run()
+                print(html)
+                RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
+                return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
 
             #聚力支付
             elif str(self.paypasslinktype.passid) == '4':
