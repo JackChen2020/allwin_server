@@ -107,6 +107,7 @@ class WeiboBase(object):
         response = self.session.post(url,data=data,allow_redirects=False).text # 提交账号密码等参数
         redirect_url = re.findall(r'location.replace\("(.*?)"\);',response)[0] # 微博在提交数据后会跳转，此处获取跳转的url
         result = self.session.get(redirect_url,allow_redirects=False).text  # 请求跳转页面
+        print(result)
         ticket,ssosavestate = re.findall(r'ticket=(.*?)&ssosavestate=(.*?)"',result)[0] #获取ticket和ssosavestate参数
         uid_url = 'https://passport.weibo.com/wbsso/login?ticket={}&ssosavestate={}&callback=sinaSSOController.doCrossDomainCallBack&scriptId=ssoscript0&client=ssologin.js(v1.4.19)&_={}'.format(ticket,ssosavestate,get_timestamp())
         data = self.session.get(uid_url).text #请求获取uid
@@ -240,4 +241,4 @@ if __name__ == '__main__':
     password="!@#tc123"
     gsid="_2A25w42jBDeRxGeBK6VYZ9S3JzzWIHXVRufsJrDV6PUJbkdANLVn7kWpNR848UD1sYIUKuVtFVB3UFF3F9vWxNkJI"
 
-    WeiboHbPay(username=username,password=password,gsid=gsid,amount=100,num=1).run()
+    print(WeiboHbPay(username=username,password=password,gsid=gsid,amount=100,num=1).run())
