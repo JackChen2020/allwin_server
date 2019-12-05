@@ -52,14 +52,6 @@ def jd_orders_shuaxin():
     with transaction.atomic():
         LastPass_JINGDONG(data={}).queryOrder()
 
-# def neichong_callback():
-#     """
-#     内冲回调
-#     :return:
-#     """
-#     print("开始内冲回调", UtilTime().today)
-#     LastPass_GCPAYS(data={}).callback_run()
-
 def order_valid_task():
     """
     订单过期处理,每天凌晨3点处理昨天的过期情况

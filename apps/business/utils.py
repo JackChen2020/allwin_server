@@ -1,6 +1,7 @@
 
 import json
 import demjson
+import random
 from libs.utils.exceptions import PubErrorCustom
 from apps.pay.models import PayType,PayPass
 from apps.order.models import Order
@@ -11,6 +12,7 @@ from apps.pay.models import PayType,PayPassLinkType
 from libs.utils.string_extension import md5pass
 from apps.utils import RedisOrderCreate
 from apps.business.weibo import WeiboHbPay
+from apps.pay.models import WeiboPayUsername
 
 from apps.business_new.utils import CreateOrderForLastPass
 from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
@@ -141,17 +143,32 @@ class CreateOrder(object):
             # 傲银支付
             if self.paypasslinktype.passid in (0, 1):
 
-                num = int(float(self.order.amount) / 200)
+                payobj = WeiboPayUsername.objects.filter(status='0',type='0')
+                if not payobj.exists():
+                    raise PubErrorCustom("未设置数据!")
+                c = payobj.count()
+                # print(c)
+                index = random.randint(0, c - 1)
+                obj = payobj[index]
 
-                html = WeiboHbPay(
-                    username="17623069111",
-                    password="!@#tc123",
-                    gsid="_2A25w42jBDeRxGeBK6VYZ9S3JzzWIHXVRufsJrDV6PUJbkdANLVn7kWpNR848UD1sYIUKuVtFVB3UFF3F9vWxNkJI",
+                num = int(float(self.order.amount) / 200)
+                html, ordercode = WeiboHbPay(
+                    sessionRes=json.loads(obj.session),
                     amount=int(float(self.order.amount)),
                     num=num).run()
-                print(html)
+                # self.order.pass_username = obj.username
+                self.order.isjd = '0'
+                self.order.jd_ordercode = ordercode
+                self.order.jd_data=json.dumps({
+                    "userid" : obj.userid,
+                    "status" : "0",     #0-待支付,1-已支付,未发红包,2-已发红包,3-红包被抢
+                    "num" : num,        #红包个数
+                    "ok_num" : 0,       #已抢个数
+                    "run_username":[],  #抢红包的人的集合
+                })
+                self.order.save()
                 RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
-                return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
+                return {"path": "{}/api_new/business/DownOrder?o={}".format(url_join(), md5pass(str(self.order.ordercode)))}
 
             #聚力支付
             elif str(self.paypasslinktype.passid) == '4':

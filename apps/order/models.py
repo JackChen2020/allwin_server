@@ -8,8 +8,10 @@ class Order(models.Model):
 
     ordercode = models.BigAutoField(primary_key=True,verbose_name="订单ID")
     userid = models.BigIntegerField(verbose_name="商户号",default=0)
+
     down_ordercode = models.CharField(verbose_name='下游订单号',default='',max_length=60)
     last_ordercode = models.CharField(verbose_name='上游订单号',default='',max_length=60)
+
     paypass = models.IntegerField(verbose_name="支付渠道",default=0)
     paypassname = models.CharField(verbose_name="支付渠道名称",default="",max_length=60)
 
@@ -48,13 +50,16 @@ class Order(models.Model):
 
     lock = models.CharField(verbose_name="是否加密,0-加密,1-不加密",default="0",max_length=1)
 
-    isjd = models.CharField(verbose_name="是否京东订单,0-是,1-否",default='1',max_length=1)
+    isjd = models.CharField(verbose_name="是否京东订单,0-是,1-否||是否红包",default='1',max_length=1)
 
-    jd_ordercode = models.CharField(verbose_name="京东订单号",max_length=120,default='')
-    jd_data = models.CharField(verbose_name="京东json数据",max_length=1024,default="")
+    jd_ordercode = models.CharField(verbose_name="京东订单号||红包支付订单号",max_length=120,default='')
+    jd_data = models.CharField(verbose_name="京东json数据|红包数据(抢红包的信息)",max_length=1024,default="")
 
-    bankno = models.CharField(verbose_name="银行卡",max_length=60,default='')
+    # last_userid = models.IntegerField(verbose_name="码商ID",default=0)
+
     open_name = models.CharField(verbose_name="开户人", max_length=30, default='')
+    bankno = models.CharField(verbose_name="银行卡",max_length=60,default='')
+
 
     def save(self, *args, **kwargs):
         t= time.mktime(timezone.now().timetuple())

@@ -83,7 +83,6 @@ class RedisOrderCreate(RedisHandler):
         res = self.redis_client.get("CREATE_ORDER_{}".format(ordercode))
         return res.decode("utf-8") if res else res
 
-
 class RedisOrderCount(RedisHandler):
 
     def __init__(self,**kwargs):
