@@ -21,16 +21,13 @@ class WeiboBase(object):
         self.amount = kwargs.get("amount")
         self.num = kwargs.get("num")
         self.sessionRes = kwargs.get("sessionRes",None)
+        self.session = kwargs.get("session",None)
+        self.cookieKey = kwargs.get("cookieKey",'.weibo.com')
         print("红包金额: {}分 ----- 红包数量: {} \n 会话:{}".format(self.amount,self.num,self.sessionRes))
 
-        self.session = requests.session()
-        self.session.verify = False
+        self.isSession=kwargs.get("isSession", None)
+        self.get_session()
 
-        self.session.headers = {
-            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Weibo (iPhone11,8__weibo__9.11.2__iphone__os12.4.1)',
-        }
-        if kwargs.get("isSession",None):
-            self.get_session()
 
     def datainitHandler(self):
         html = self.session.get('https://hongbao.weibo.com/h5/pay?groupid=1000303&ouid={}'.format(self.sessionRes['uid'])).text
@@ -41,8 +38,27 @@ class WeiboBase(object):
             if not self.sessionRes:
                 self.sessionRes={}
 
-            for key,value in self.sessionRes['cookie']['.weibo.com'].items():
-                self.session.cookies.set(key, value)
+            if self.isSession:
+                self.session = requests.session()
+                self.session.verify = False
+
+                self.session.headers = {
+                    'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Weibo (iPhone11,8__weibo__9.11.2__iphone__os12.4.1)',
+                }
+
+                for key,value in self.sessionRes['cookie'][self.cookieKey].items():
+                    self.session.cookies.set(key, value)
+            else:
+                if not self.session:
+                    self.session = requests.session()
+                    self.session.verify = False
+
+                    self.session.headers = {
+                        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Weibo (iPhone11,8__weibo__9.11.2__iphone__os12.4.1)',
+                    }
+                else:
+                    self.session.verify = False
+
         except Exception as e:
             raise Exception("无可用session!")
 
@@ -159,7 +175,6 @@ class WeiboHbPay(WeiboBase):
         self.orderForAliPay()
         return self.createSkipAliPayResponse()
 
-
 class WeiboLogin(WeiboBase):
 
     def __init__(self,**kwargs):
@@ -228,6 +243,61 @@ a525091a7e60e4dced9f69b2e488b&did=6c622ce71e3a34c27cbd3b658eb8614e&lang=zh_CN&ua
             print(str(e))
             raise Exception("登录错误,请联系管理员!")
 
+    def pcLogin(self,username,password):
+
+        '''预登录，获取一些必须的参数'''
+        self.su = base64.b64encode(username.encode())  #阅读js得知用户名进行base64转码
+        url = 'https://login.sina.com.cn/sso/prelogin.php?entry=weibo&callback=sinaSSOController.preloginCallBack&su={}&rsakt=mod&checkpin=1&client=ssologin.js(v1.4.19)&_={}'.format(quote(self.su),get_timestamp()) #注意su要进行quote转码
+        response = self.session.get(url).content.decode()
+        # print(response)
+        self.nonce = re.findall(r'"nonce":"(.*?)"',response)[0]
+        self.pubkey = re.findall(r'"pubkey":"(.*?)"',response)[0]
+        self.rsakv = re.findall(r'"rsakv":"(.*?)"',response)[0]
+        self.servertime = re.findall(r'"servertime":(.*?),',response)[0]
+
+        '''用rsa对明文密码进行加密，加密规则通过阅读js代码得知'''
+        publickey = rsa.PublicKey(int(self.pubkey, 16), int('10001', 16))
+        message = str(self.servertime) + '\t' + str(self.nonce) + '\n' + str(password)
+        self.sp = b2a_hex(rsa.encrypt(message.encode(), publickey))
+
+        url = 'https://login.sina.com.cn/sso/login.php?client=ssologin.js(v1.4.19)'
+        data = {
+            'entry': 'weibo',
+            'gateway': '1',
+            'from': '',
+            'savestate': '7',
+            'qrcode_flag': 'false',
+            'useticket': '1',
+            'pagerefer': 'https://login.sina.com.cn/crossdomain2.php?action=logout&r=https%3A%2F%2Fweibo.com%2Flogout.php%3Fbackurl%3D%252F',
+            'vsnf': '1',
+            'su': self.su,
+            'service': 'miniblog',
+            'servertime': str(int(self.servertime) + random.randint(1, 20)),
+            'nonce': self.nonce,
+            'pwencode': 'rsa2',
+            'rsakv': self.rsakv,
+            'sp': self.sp,
+            'sr': '1536 * 864',
+            'encoding': 'UTF - 8',
+            'prelt': '35',
+            'url': 'https://weibo.com/ajaxlogin.php?framelogin=1&callback=parent.sinaSSOController.feedBackUrlCallBack',
+            'returntype': 'META',
+        }
+        response = self.session.post(url, data=data, allow_redirects=False).text  # 提交账号密码等参数
+        redirect_url = re.findall(r'location.replace\("(.*?)"\);', response)[0]  # 微博在提交数据后会跳转，此处获取跳转的url
+        result = self.session.get(redirect_url, allow_redirects=False).text  # 请求跳转页面
+        ticket, ssosavestate = re.findall(r'ticket=(.*?)&ssosavestate=(.*?)"', result)[0]  # 获取ticket和ssosavestate参数
+        uid_url = 'https://passport.weibo.com/wbsso/login?ticket={}&ssosavestate={}&callback=sinaSSOController.doCrossDomainCallBack&scriptId=ssoscript0&client=ssologin.js(v1.4.19)&_={}'.format(
+            ticket, ssosavestate, get_timestamp())
+        data = self.session.get(uid_url).text  # 请求获取uid
+        uid = re.findall(r'"uniqueid":"(.*?)"', data)[0]
+
+        sessionRes={}
+        for key,value in self.session.cookies._cookies['.weibo.com']['/'].items():
+            sessionRes[key] = value.value
+
+        return sessionRes
+
     def filterloginres(self,res):
 
         # res = json.loads(res)
@@ -248,19 +318,56 @@ a525091a7e60e4dced9f69b2e488b&did=6c622ce71e3a34c27cbd3b658eb8614e&lang=zh_CN&ua
         return session,res
 
 
+class WeiboCallBack(WeiboBase):
+
+    def __init__(self,**kwargs):
+
+        super(WeiboCallBack,self).__init__(**kwargs)
+        self.session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+        self.session.headers['Host'] = 'pay.sc.weibo.com'
+        self.session.headers['Origin'] = 'https://pay.sc.weibo.com'
+        self.session.headers['Referer'] = 'https://pay.sc.weibo.com/center/pc/c'
+
+    def queryOrderForWeibo(self,ordercode,start_time,end_time):
+
+
+        url = "https://pay.sc.weibo.com/aj/pc/biz/list"
+        data={
+            "biz_type":0,
+            "status":0,
+            "start_time":start_time,
+            "end_time":end_time,
+            "page":1,
+            "page_size":10,
+            "biz_id":ordercode
+        }
+        res = json.loads(self.session.post(url,data).content.decode('utf-8'))
+        if res['code']!='100000':
+            return False,res['msg']
+        else:
+            return True,res['data']['biz']
+
+
 if __name__ == '__main__':
 
-    session={"gsid": "_2A25w7N85DeRxGeNH61YZ9SrIwjyIHXVRuFXxrDV6PUJbkdAKLVfTkWpNSvs4paAigwzP_ACw3rd4V_zHbZMN3Dg0", "uid": "5904854490", "cookie": {".sina.com.cn": {"SUB": "_2A25w7PFMDeRhGeNH61YZ9SrIwjyIHXVQYbkErDV_PUJbitAKLVn5kWtNSvs4pZA-Aryvxepb0ARJGwQpTaZigJiw", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWj1yl.QKel5o_7Wo65RIgZ5NHD95Qf1K5X1h-XSh.7Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSK.7ShnfShB4e5tt"}, ".sina.cn": {"SUB": "_2A25w7PFMDeRhGeNH61YZ9SrIwjyIHXVQYbkErDV9PUJbitAKLW_7kWtNSvs4pQ9AyFfFNpYOgOV4iLIZ4AvEcWgO", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWj1yl.QKel5o_7Wo65RIgZ5NHD95Qf1K5X1h-XSh.7Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSK.7ShnfShB4e5tt"}, ".weibo.com": {"SUB": "_2A25w7PFMDeRhGeNH61YZ9SrIwjyIHXVQYbkErDV8PUJbitAKLWf4kWtNSvs4pSk3qOgmAqZ006VKmsyKwnw6XdN7", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWj1yl.QKel5o_7Wo65RIgZ5NHD95Qf1K5X1h-XSh.7Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSK.7ShnfShB4e5tt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmOCgZfPdM1LZx8Fp-SvWfmRqla4C1HI4mhZD1kBtZZCg..", "SUHB": "0ebdC8egROM5nW"}, ".weibo.cn": {"SUB": "_2A25w7PFMDeRhGeNH61YZ9SrIwjyIHXVQYbkErDV6PUJbitAKLU3zkWtNSvs4pZk6EUU1et5mA9le2nVkS7KQF5Ks", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWj1yl.QKel5o_7Wo65RIgZ5NHD95Qf1K5X1h-XSh.7Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSK.7ShnfShB4e5tt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmOCgZfPdM1LZx8Fp-SvWfmbuNbCvRSfenFumJflSMUtQ..", "SUHB": "08JLE6aXc0YbNp"}}, "st": "ac7898"}
+    session={"uid": "6424853549", "cookie": {"pccookie": {"SCF": "ApRjxfCUUgfZNrF6C-HMazivcfDQbJiaECq4NBIyzO-7qfkLBMv_enLJz8HcyxX0WIQUqqiZM9r8wejh_LzAZIs.", "SUB": "_2A25w7XvhDeRhGeBK6VYZ9S3JzzWIHXVTm-oprDV8PUNbmtBeLW_CkW9NR848UCVap-qDZJKJ3LU3NXLocobowOsJ", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0h1J80SCC16sb9", "ALF": "1607089958", "SSOLoginState": "1575553969"}}}
 
-    print(WeiboHbPay(amount=100,num=1,sessionRes=session).run())
-    # username="18580881001"
-    # s=WeiboLogin()
-    # # s.get_vercode(username)
-    #
-    #
-    # # s.login(username,"093579")
-    # session,res = s.filterloginres(res)
-    # a=WeiboHbPay(amount=100, num=1, sessionRes=session)
-    # a.datainitHandler()
-    #
-    # print(a.run())
+
+    # s=WeiboLogin(cookieKey='pccookie').pcLogin(username="18580881001",password="!@#tc123")
+    # print(s)
+    flag,s= WeiboCallBack(sessionRes=session,cookieKey='pccookie',isSession=True).queryOrderForWeibo(ordercode="124445895886903999",start_time="2019-12-03",end_time="2019-12-05")
+    # print(flag,s)
+    if not flag:
+        print("查询失败!")
+    else:
+        if not len(s):
+            print("查询无数据")
+        else:
+            if s[0]['status'] == '2':
+                print("交易成功")
+            elif s[0]['status'] == '4':
+                print("交易关闭")
+            elif s[0]['status'] == '1':
+                print("待付款")
+            else:
+                print("未知状态")

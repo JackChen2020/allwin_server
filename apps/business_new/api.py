@@ -12,12 +12,14 @@ from apps.business_new.jd_api import jdHandler
 from apps.lastpass.utils import LastPass_GCPAYS
 from django.shortcuts import render
 from django.http import HttpResponse
+import json
 from apps.utils import RedisOrderCreate
 from libs.utils.exceptions import PubErrorCustom
+from libs.utils.mytime import UtilTime
 
 from apps.order.models import CashoutList
 from apps.user.models import Users
-
+from apps.pay.models import WeiboPayUsername
 from apps.account import AccounRollBackForApiFee,AccountRollBackForApi
 
 
@@ -41,6 +43,54 @@ class BusinessNewAPIView(GenericViewSetCustom):
             raise PubErrorCustom("此订单已过期!")
         else:
             return HttpResponse(html, content_type='text/html')
+
+
+    @list_route(methods=['POST'])
+    @Core_connector_DAIFU()
+    def getWeiboUserInfo(self,request):
+
+        data=[]
+        u = WeiboPayUsername.objects.filter(status='0')
+        if u.exists():
+            for item in u:
+                data.append({
+                    "id" : item.id,
+                    "username":item.username,
+                    "password":item.password
+                })
+
+        return {"data":data}
+
+    @list_route(methods=['POST'])
+    @Core_connector_DAIFU(transaction=True)
+    def setWeiboUserinfo(self,request):
+
+        print(request.data)
+        if not request.data.get("datas"):
+            raise PubErrorCustom("无会话数据!")
+
+        for item in request.data.get("datas"):
+            try:
+                s = WeiboPayUsername.objects.get(id=item['id'])
+            except WeiboPayUsername.DoesNotExist:
+                raise PubErrorCustom("无此账户信息!{}".format(item['id']))
+
+            if not len(s.session):
+                s.session = {}
+                s.session['uid'] = item['uid']
+                s.session['cookie']={}
+                s.session['cookie']['pccookie'] = item['session']
+
+            else:
+                s.session = json.loads(s.session)
+                if not len(s.session['cookie']):
+                    s.session['cookie']={}
+                s.session['cookie']['pccookie'] = item['session']
+            s.logintime = UtilTime().timestamp
+            s.session = json.dumps(s.session)
+            s.save()
+
+        return None
 
     @list_route(methods=['POST'])
     @Core_connector_DAIFU(transaction=True)

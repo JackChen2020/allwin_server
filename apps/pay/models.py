@@ -125,6 +125,7 @@ class WeiboPayUsername(models.Model):
 
     status = models.CharField(max_length=1,verbose_name="是否开启,0-开启,1-暂用",default='1')
 
+    logintime = models.BigIntegerField(default=0)
     createtime = models.BigIntegerField(default=0)
 
     def save(self, *args, **kwargs):

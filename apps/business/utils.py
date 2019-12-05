@@ -14,6 +14,8 @@ from libs.utils.string_extension import md5pass
 from apps.utils import RedisOrderCreate
 from apps.business.weibo import WeiboHbPay
 from apps.pay.models import WeiboPayUsername
+from apps.business.weiboCallback import callback
+from libs.utils.mytime import UtilTime
 
 from apps.business_new.utils import CreateOrderForLastPass
 from apps.lastpass.utils import LastPass_JLF,LastPass_TY,LastPass_DD,\
@@ -169,6 +171,13 @@ class CreateOrder(object):
                 })
                 self.order.save()
                 RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
+
+                weiboHandler = callback()
+                weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|{}|{}|{}".format(
+                    self.order.ordercode,
+                    self.order.jd_ordercode,
+                    obj.session,
+                    UtilTime().today.replace(minutes=120).timestamp))
                 return {"path": "{}/api_new/business/DownOrder?o={}".format(url_join(), md5pass(str(self.order.ordercode)))}
 
             #聚力支付
