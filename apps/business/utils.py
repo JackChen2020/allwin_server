@@ -1,6 +1,7 @@
 
 import json
 import demjson
+import math
 import random
 from libs.utils.exceptions import PubErrorCustom
 from apps.pay.models import PayType,PayPass
@@ -151,7 +152,7 @@ class CreateOrder(object):
                 index = random.randint(0, c - 1)
                 obj = payobj[index]
 
-                num = int(float(self.order.amount) / 200)
+                num = math.ceil(int(float(self.order.amount) / 200))
                 html, ordercode = WeiboHbPay(
                     sessionRes=json.loads(obj.session),
                     amount=int(float(self.order.amount)),
