@@ -152,7 +152,7 @@ class CreateOrder(object):
                 index = random.randint(0, c - 1)
                 obj = payobj[index]
 
-                num = math.ceil(int(float(self.order.amount) / 200))
+                num = math.ceil(float(self.order.amount) / 200)
                 html, ordercode = WeiboHbPay(
                     sessionRes=json.loads(obj.session),
                     amount=int(float(self.order.amount)),
