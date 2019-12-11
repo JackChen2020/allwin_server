@@ -378,6 +378,7 @@ class WeiboFollow(WeiboBase):
         关注
         :return:
         """
+        print("关注的人:",to)
         pass
         self.session.headers['Referer'] = 'https://www.weibo.com/u/{}?is_hot=1&noscale_head=1'.format(to)
         url="https://www.weibo.com/aj/f/followed?ajwvr=6"
