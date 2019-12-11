@@ -226,7 +226,7 @@ class WeiBoLoginForPhone(WeiboLogin):
 
         # res = json.loads(res)
 
-
+        print(res)
         session=dict(
             gsid = res['gsid'],
             uid = res['uid'],
