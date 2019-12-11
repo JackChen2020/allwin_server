@@ -39,6 +39,7 @@ class callback(object):
                 cookieKey='pccookie'
                 """
                 flag,s= wbPayClass.queryOrderForWeibo(ordercode=self.other_ordercode,start_time=start_time,end_time=end_time)
+                print(s)
                 if not flag:
                     self.redisdataCall("查询失败!{}".format(s))
                     continue
@@ -48,6 +49,7 @@ class callback(object):
                         continue
                     else:
                         if s[0]['status'] == '2':
+                            print("成功")
                             pass
                         elif s[0]['status'] == '4':
                             self.redisdataCall("交易关闭!{}".format(s))
