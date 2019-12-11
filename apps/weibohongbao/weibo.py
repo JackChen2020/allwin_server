@@ -448,16 +448,6 @@ class WeiboPay(WeiboBase):
 
     def getPayId(self,url):
 
-        # params = ""
-        # try:
-        #     self.session.get(url=url)
-        # except Exception as a:
-        #     # print(a)
-        #     params = str(a).split("No connection adapters were found for")[1]. \
-        #         replace("sinaweibo://wbpay?", "").replace("'", '').split("pay_params=")[1]
-        #     params = unquote(params, 'utf-8')
-        #     print(params)
-
         params = unquote(self.session.head(url=url,stream=True).headers['Location'].replace("sinaweibo://wbpay?", "").split("pay_params=")[1],'utf-8')
         print(params)
 
