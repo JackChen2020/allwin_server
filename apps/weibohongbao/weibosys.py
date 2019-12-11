@@ -135,7 +135,16 @@ class weiboSysRun(object):
                 wbLFPClass.login_params = item['params']
                 wbLFPClass.login_params['vercode'] = item['vercode']
                 try:
-                    wbUserObj.session = json.dumps(wbLFPClass.login())
+                    if wbUserObj.session:
+                        session = json.loads(wbUserObj.session)
+                    else:
+                        session = {}
+                        session['cookie'] = {}
+                    res = json.dumps(wbLFPClass.login())
+                    session['uid'] = res['uid']
+                    session['cookie']['pccookie'] = res['cookie']['pccookie']
+
+                    wbUserObj.session = json.dumps(session)
                     wbUserObj.logintime = UtilTime().timestamp
                     wbUserObj.save()
                 except Exception as e:
@@ -161,7 +170,16 @@ class weiboSysRun(object):
                     continue
                 else:
                     try:
-                        wbUserObj.session = json.dumps(wbLFPClass.login())
+                        if wbUserObj.session:
+                            session = json.loads(wbUserObj.session)
+                        else:
+                            session = {}
+                            session['cookie'] = {}
+                        res = json.dumps(wbLFPClass.login())
+                        session['uid'] = res['uid']
+                        session['cookie']['pccookie'] = res['cookie']['pccookie']
+
+                        wbUserObj.session = json.dumps(session)
                         wbUserObj.logintime = UtilTime().timestamp
                         wbUserObj.save()
                     except Exception as e:
