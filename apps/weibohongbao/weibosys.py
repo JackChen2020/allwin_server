@@ -333,6 +333,7 @@ class weiboSysRun(object):
         if WbSLObj.exists():
             for item in WbSLObj:
                 uidsObj=json.loads(item.uids)
+                print(uidsObj)
                 for item_member in WeiboGroupMember.objects.filter(group_id=item.groupid):
                     if len(item.uids) and item_member.son_uid in uidsObj['uids']:
                         continue
@@ -349,6 +350,7 @@ class weiboSysRun(object):
                 if item.getcount>=item.sendcount:
                     item.status = '0'
 
+                print(uidsObj)
                 item.uids = json.dumps(uidsObj)
                 item.save()
 
