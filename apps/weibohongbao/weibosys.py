@@ -141,6 +141,7 @@ class weiboSysRun(object):
                         session = {}
                         session['cookie'] = {}
                     res = json.dumps(wbLFPClass.login())
+                    print(res)
                     session['uid'] = res['uid']
                     session['cookie']['pccookie'] = res['cookie']['pccookie']
 
@@ -176,6 +177,7 @@ class weiboSysRun(object):
                             session = {}
                             session['cookie'] = {}
                         res = json.dumps(wbLFPClass.login())
+                        print(res)
                         session['uid'] = res['uid']
                         session['cookie']['pccookie'] = res['cookie']['pccookie']
 
