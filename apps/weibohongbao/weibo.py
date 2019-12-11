@@ -397,7 +397,7 @@ class WeiboFollow(WeiboBase):
 class WeiboPay(WeiboBase):
 
     def __init__(self,**kwargs):
-        kwargs.setdefault("cookieKey", ".weibo.cn")
+        kwargs.setdefault("cookieKey", ".weibo.com")
         super(WeiboPay, self).__init__(**kwargs)
 
     def pay(self,price,amount,num,msgid=""):
