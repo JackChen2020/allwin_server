@@ -349,7 +349,7 @@ class weiboSysRun(object):
                 if item.getcount>=item.sendcount:
                     item.status = '0'
 
-                item.uids = json.dumps({"uids": uidsObj})
+                item.uids = json.dumps(uidsObj)
                 item.save()
 
 
