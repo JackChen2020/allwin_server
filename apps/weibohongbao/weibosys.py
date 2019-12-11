@@ -146,6 +146,7 @@ class weiboSysRun(object):
                     session['cookie']['pccookie'] = res['cookie']['pccookie']
 
                     wbUserObj.session = json.dumps(session)
+                    wbUserObj.uid = session['uid']
                     wbUserObj.logintime = UtilTime().timestamp
                     wbUserObj.save()
                 except Exception as e:
@@ -182,6 +183,7 @@ class weiboSysRun(object):
                         session['cookie']['pccookie'] = res['cookie']['pccookie']
 
                         wbUserObj.session = json.dumps(session)
+                        wbUserObj.uid = session['uid']
                         wbUserObj.logintime = UtilTime().timestamp
                         wbUserObj.save()
                     except Exception as e:
