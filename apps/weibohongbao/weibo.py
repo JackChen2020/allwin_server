@@ -195,6 +195,7 @@ class WeiBoLoginForPhone(WeiboLogin):
         """
 
         """
+        print(username,vercode)
         data = dict(
             guestid="1014111034742",
             getcookie="1",
