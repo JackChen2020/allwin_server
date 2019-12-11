@@ -442,6 +442,7 @@ class WeiboPay(WeiboBase):
 
     def getPayId(self,url):
         print(url)
+        self.reset_session(sessionRes=self.sessionRes,cookieKey='.weibo.com')
         params = unquote(self.session.head(url=url,stream=True).headers['Location'].replace("sinaweibo://wbpay?", "").split("pay_params=")[1],'utf-8')
         print(params)
 
