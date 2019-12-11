@@ -435,7 +435,7 @@ class WeiboPay(WeiboBase):
         }
         rRes=self.session.post(url=url, data=data)
         res = json.loads(rRes.content.decode("utf-8"))
-        # print(res)
+        print(res)
         if res['code'] != "100000":
             raise Exception(res['msg'])
         return res['data']['url'], res['data']['url'].split("out_pay_id=")[1].split('&')[0]
