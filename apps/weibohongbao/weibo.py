@@ -409,7 +409,7 @@ class WeiboFollow(WeiboBase):
 class WeiboPay(WeiboBase):
 
     def __init__(self,**kwargs):
-        kwargs.setdefault("cookieKey", ".weibo.cn")
+        kwargs.setdefault("cookieKey", ".weibo.com")
         super(WeiboPay, self).__init__(**kwargs)
 
     def pay(self,price,amount,num,msgid=""):
@@ -502,6 +502,7 @@ class WeiboPay(WeiboBase):
 
     def queryOrderForWeibo(self,ordercode,start_time,end_time):
 
+        self.reset_session(sessionRes=self.sessionRes,cookieKey=".weibo.cn")
         self.session.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
         self.session.headers['Host'] = 'pay.sc.weibo.com'
         self.session.headers['Origin'] = 'https://pay.sc.weibo.com'
