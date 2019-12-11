@@ -327,3 +327,17 @@ class weiboSysRun(object):
 
 
 
+
+        # wbSLObj = WeiboSendList.objects.filter(taskid=self.wbOTask.taskid)
+        # rate=0.0
+        # if wbSLObj.exists():
+        #     amount = 0.0
+        #     for item in wbSLObj:
+        #         price = float(item.amount) / item.sendcount
+        #         amount += price * float(item.getcount)
+        #     rate = amount * 100.0 / (float(self.wbOTask.amountwhat) * float(self.wbOTask.robnumber))
+        # self.wbOTask.progree = rate
+        # self.wbOTask.save()
+
+
+
