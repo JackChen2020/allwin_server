@@ -409,7 +409,7 @@ class WeiboPay(WeiboBase):
         :param msgid: 群组ID
         :return:
         """
-        self.session.headers['Host'] = "mall.e.weibo.cn"
+        self.session.headers['Host'] = "mall.e.weibo.com"
         self.session.headers['Accept'] = '* / *'
         self.session.headers['X-Requested-With'] = 'XMLHttpRequest'
         self.session.headers['Accept-Language'] = 'zh-cn'
