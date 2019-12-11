@@ -683,6 +683,7 @@ class WeiboHbGet(WeiboBase):
     def rob(self,url):
         html = self.session.get(url=url).text
         res = re.compile(r'<a.*=zhadan_hongbao_gxth">?.*?</a>').findall(html)
+        print(html)
         if res and len(res) > 0 and '感谢土豪' in res[0]:
             return True
         else:

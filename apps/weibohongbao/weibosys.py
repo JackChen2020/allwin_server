@@ -340,6 +340,7 @@ class weiboSysRun(object):
 
                     wbUserObj = WeiboUser.objects.get(uid=item_member.son_uid)
                     try:
+                        print(item_member.son_uid)
                         rFlag = WeiboHbGet(sessionRes=json.loads(wbUserObj.session)).rob(url=item.url)
                         if rFlag:
                             uidsObj['uids'].append(item_member.son_uid)
