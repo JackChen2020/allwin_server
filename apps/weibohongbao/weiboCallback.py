@@ -26,14 +26,16 @@ class callback(object):
             self.other_ordercode = redisRes.decode('utf-8').split("|allwin|")[1]
             self.session = redisRes.decode('utf-8').split("|allwin|")[2]
             self.endtime = redisRes.decode('utf-8').split("|allwin|")[3]
-
+            print(self.other_ordercode)
+            # print(UtilTime().timestamp)
+            # print(int(self.endtime))
+            # print(self.session)
             if UtilTime().timestamp >= int(self.endtime):
                 continue
             try:
                 ut = UtilTime()
                 end_time = ut.arrow_to_string(format_v="YYYY-MM-DD")
                 start_time = ut.arrow_to_string(ut.today.shift(days=-3),format_v="YYYY-MM-DD")
-
                 wbPayClass = WeiboPay(sessionRes=json.loads(self.session))
                 """
                 cookieKey='pccookie'
