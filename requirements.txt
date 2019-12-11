@@ -8,6 +8,7 @@ djangorestframework==3.8.2
 markdown==2.6.11
 mysqlclient
 django-cors-headers
+beautifulsoup4
 openpyxl
 apscheduler
 django-apscheduler

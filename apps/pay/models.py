@@ -116,8 +116,13 @@ class BankInfo(models.Model):
 
 class WeiboPayUsername(models.Model):
 
-    id=models.BigAutoField(primary_key=True,verbose_name="关联ID")
+    """
+    微博红包账号
+    """
+
+    id=models.BigAutoField(primary_key=True,verbose_name="id")
     userid=models.IntegerField(default=0,verbose_name="码商ID")
+    uid = models.CharField(max_length=20,verbose_name="账户UID")
     username = models.CharField(max_length=60,verbose_name="账号",default='')
     password = models.CharField(max_length=60, verbose_name="密码",default='')
     session = models.TextField(verbose_name="会话信息",default='')
@@ -137,3 +142,30 @@ class WeiboPayUsername(models.Model):
         verbose_name = '红包账号表'
         verbose_name_plural = verbose_name
         db_table = 'webpayusername'
+
+
+class WeiBoHbList(models.Model):
+
+    id=models.BigAutoField(primary_key=True,verbose_name="id")
+
+    uid = models.CharField(max_length=20, verbose_name="账户UID")
+    group_id = models.CharField(max_length=20, verbose_name="账户UID")
+    ctime = models.CharField(max_length=20, verbose_name="发红包时间")
+    hongbao_total_money = models.DecimalField(max_digits=16,decimal_places=6,verbose_name="红包金额")
+    event_send_num_cash = models.IntegerField(verbose_name="抢红包数量",default=0)
+    event_total_num_cash = models.IntegerField(verbose_name="红包总共数量",default=0)
+    hongbaourl = models.CharField(verbose_name="红包详情",max_length=512,default="")
+    eid = models.CharField(max_length=20,verbose_name="红包ID")
+    close_openbag = models.CharField(max_length=20,verbose_name="未知数据")
+
+    createtime = models.BigIntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        if not self.createtime:
+            self.createtime = time.mktime(timezone.now().timetuple())
+        return super(WeiBoHbList, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = '红包明细'
+        verbose_name_plural = verbose_name
+        db_table = 'weibohblist'

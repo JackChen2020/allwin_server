@@ -28,7 +28,6 @@ class WeiboBase(object):
         self.isSession=kwargs.get("isSession", None)
         self.get_session()
 
-
     def datainitHandler(self):
         html = self.session.get('https://hongbao.weibo.com/h5/pay?groupid=1000303&ouid={}'.format(self.sessionRes['uid'])).text
         self.sessionRes['st'] = html.split("st:")[1].split(",")[0].replace("'","")
@@ -88,9 +87,8 @@ class WeiboHbPay(WeiboBase):
             "share": 0,
             "_type": 1,
             "isavg": 0,
-            "tab": 1,
-            "genter": "f,m",
-            "clear": 1
+            "tab": 2,
+            "pass":"123456"
         }
         res = json.loads(self.session.post(url=url, data=data).content.decode("utf-8"))
         print("getPayUrl: {}".format(res))
@@ -98,7 +96,9 @@ class WeiboHbPay(WeiboBase):
             #授权失败
             raise Exception(res['msg'])
         else:
-            self.payScWeiboUrl = res['url']
+            # self.payScWeiboUrl = res['url']
+            #暂时用这种方式跳转
+            return res['url'],res['url'].split("out_pay_id=")[1].split('&')[0]
 
     def getPayParams(self):
 
@@ -128,7 +128,6 @@ class WeiboHbPay(WeiboBase):
         url = "https://pay.sc.weibo.com/api/client/opensdk/pay/prepare"
         try:
             res = self.session.post(url=url,data=data)
-            print(res.text)
         except Exception as e:
             raise  Exception("createOrderForWeibo Error ： {}".format(str(e)))
 
@@ -169,11 +168,21 @@ class WeiboHbPay(WeiboBase):
 
     def run(self):
         self.datainitHandler()
-        self.getPayUrl()
-        self.getPayParams()
-        self.orderForWeibo()
-        self.orderForAliPay()
-        return self.createSkipAliPayResponse()
+        return self.getPayUrl()
+
+class WeiboHbHandler(WeiboBase):
+
+    def __init__(self,**kwargs):
+        super(WeiboHbHandler, self).__init__(**kwargs)
+        self.session.headers[
+            'User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36'
+
+    def Hblist(self,page=1):
+
+        url="https://hongbao.weibo.com/aj_h5/hongbaopage?page={}".format(page)
+        res = json.loads(self.session.get(url=url).content.decode('utf-8'))
+        return res['cnt'],res['data']['list']
+
 
 class WeiboLogin(WeiboBase):
 
@@ -317,7 +326,6 @@ a525091a7e60e4dced9f69b2e488b&did=6c622ce71e3a34c27cbd3b658eb8614e&lang=zh_CN&ua
 
         return session,res
 
-
 class WeiboCallBack(WeiboBase):
 
     def __init__(self,**kwargs):
@@ -339,7 +347,8 @@ class WeiboCallBack(WeiboBase):
             "end_time":end_time,
             "page":1,
             "page_size":10,
-            "biz_id":ordercode
+            # "biz_id":ordercode
+            "order_id":"7400006072333"
         }
         res = json.loads(self.session.post(url,data).content.decode('utf-8'))
         if res['code']!='100000':
@@ -347,27 +356,39 @@ class WeiboCallBack(WeiboBase):
         else:
             return True,res['data']['biz']
 
-
 if __name__ == '__main__':
 
     session={"uid": "6424853549", "cookie": {"pccookie": {"SCF": "ApRjxfCUUgfZNrF6C-HMazivcfDQbJiaECq4NBIyzO-7qfkLBMv_enLJz8HcyxX0WIQUqqiZM9r8wejh_LzAZIs.", "SUB": "_2A25w7XvhDeRhGeBK6VYZ9S3JzzWIHXVTm-oprDV8PUNbmtBeLW_CkW9NR848UCVap-qDZJKJ3LU3NXLocobowOsJ", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0h1J80SCC16sb9", "ALF": "1607089958", "SSOLoginState": "1575553969"}}}
+    session={"uid": "6424853549", "cookie": {"pccookie": {"SCF": "AolqRXzRJ_aPgQVpQgZA7t9w3wiXSqHS6J9VjMQv1aJ2h9c44_YdTJlkamjdiJiPybNAvwXG-3bUUosi2RoRDVA.", "SUB": "_2A25w7cV-DeRhGeBK6VYZ9S3JzzWIHXVTmrG2rDV8PUNbmtBeLUfYkW9NR848UHj9tFke__L7cb99SupV7Kc8swns", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0jBIffZWGBj5F6", "ALF": "1607133356", "SSOLoginState": "1575597359"}}}
 
+    s = WeiboHbHandler(sessionRes=session,cookieKey='pccookie',isSession=True)
+    count,res=s.Hblist(page=1)
+    print(count)
+    print(json.dumps(res))
+
+    # s=WeiboHbPay(sessionRes=session,amount=0.01,num=1,cookieKey='pccookie')
+
+    # url,ordercode = s.run()
+    # print(url)
+
+    # s.payScWeiboUrl="https://pay.sc.weibo.com/api/merchant/pay/cashier?sign_type=RSA&sign=J%2BtikUjFUJIJmGkIssk9zq%2BHjaEyNd%2FNYzEx%2BpTEec8wlseEyqekmncRO1MkX0W4a0G0nkdoJ0rB10jWQs9SPATSt6HZYC%2B%2BZ8vaM77%2BEKBHqjiMdPtjtBdp0JggjWzp1Z%2Bnet42Sm%2BYOd20MEMIE8kotMiGokbpi%2FFlIRstN%2Bw%3D&seller_id=5136362277&appkey=743219212&out_pay_id=7100028362275&notify_url=https%3A%2F%2Fhb.e.weibo.com%2Fv2%2Fbonus%2Fpay%2Fwnotify&return_url=https%3A%2F%2Fhb.e.weibo.com%2Fv2%2Fbonus%2Fpay%2Fwreturn%3Fsinainternalbrowser%3Dtopnav&subject=%E5%BE%AE%E5%8D%9A%E7%BA%A2%E5%8C%85&body=%E7%B2%89%E4%B8%9D%E7%BA%A2%E5%8C%85&total_amount=1&cfg_follow_uid=5136362277&cfg_share_opt=0&cfg_follow_opt=0"
+    # s.getPayParams()
 
     # s=WeiboLogin(cookieKey='pccookie').pcLogin(username="18580881001",password="!@#tc123")
     # print(s)
-    flag,s= WeiboCallBack(sessionRes=session,cookieKey='pccookie',isSession=True).queryOrderForWeibo(ordercode="124445895886903999",start_time="2019-12-03",end_time="2019-12-05")
+    # flag,s= WeiboCallBack(sessionRes=session,cookieKey='pccookie',isSession=True).queryOrderForWeibo(ordercode="124445895886903999",start_time="2019-12-03",end_time="2019-12-05")
     # print(flag,s)
-    if not flag:
-        print("查询失败!")
-    else:
-        if not len(s):
-            print("查询无数据")
-        else:
-            if s[0]['status'] == '2':
-                print("交易成功")
-            elif s[0]['status'] == '4':
-                print("交易关闭")
-            elif s[0]['status'] == '1':
-                print("待付款")
-            else:
-                print("未知状态")
+    # if not flag:
+    #     print("查询失败!")
+    # else:
+    #     if not len(s):
+    #         print("查询无数据")
+    #     else:
+    #         if s[0]['status'] == '2':
+    #             print("交易成功")
+    #         elif s[0]['status'] == '4':
+    #             print("交易关闭")
+    #         elif s[0]['status'] == '1':
+    #             print("待付款")
+    #         else:
+    #             print("未知状态")

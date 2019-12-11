@@ -11,11 +11,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "education.settings")
 django.setup()
 
 """
-回调
+同步红包支付号
 """
 
-from apps.weibohongbao.weiboCallback import callback
+from apps.weibohongbao.weiboCallback import callbackGetOrdercode
 
 
 if __name__ == '__main__':
-    callback().run()
+    callbackGetOrdercode().run()

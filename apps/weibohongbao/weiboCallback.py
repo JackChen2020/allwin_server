@@ -1,7 +1,9 @@
 
 from requests import request
 import time,urllib,json
-from apps.business.weibo import WeiboCallBack,WeiboHbPay
+# from apps.business.weibo import WeiboCallBack,WeiboHbPay
+from apps.weibohongbao.weibo import WeiboPay
+from apps.weibohongbao.weibosys import weiboSysRun
 from apps.utils import RedisHandler,url_join
 from libs.utils.mytime import UtilTime
 from libs.utils.log import logger
@@ -20,20 +22,23 @@ class callback(object):
             if not redisRes:
                 continue
 
-            self.ordercode = redisRes.decode('utf-8').split("|")[0]
-            self.other_ordercode = redisRes.decode('utf-8').split("|")[1]
-            self.session = redisRes.decode('utf-8').split("|")[2]
-            self.endtime = redisRes.decode('utf-8').split("|")[3]
+            self.ordercode = redisRes.decode('utf-8').split("|allwin|")[0]
+            self.other_ordercode = redisRes.decode('utf-8').split("|allwin|")[1]
+            self.session = redisRes.decode('utf-8').split("|allwin|")[2]
+            self.endtime = redisRes.decode('utf-8').split("|allwin|")[3]
 
             if UtilTime().timestamp >= int(self.endtime):
                 continue
             try:
                 ut = UtilTime()
-                start_time = ut.arrow_to_string(format_v="YYYY-MM-DD")
-                end_time = ut.arrow_to_string(ut.today.shift(days=-3),format_v="YYYY-MM-DD")
-                flag,s= WeiboCallBack(sessionRes=json.loads(self.session),cookieKey='pccookie',isSession=True)\
-                    .queryOrderForWeibo(ordercode=self.ordercode,start_time=start_time,end_time=end_time)
+                end_time = ut.arrow_to_string(format_v="YYYY-MM-DD")
+                start_time = ut.arrow_to_string(ut.today.shift(days=-3),format_v="YYYY-MM-DD")
 
+                wbPayClass = WeiboPay(sessionRes=json.loads(self.session))
+                """
+                cookieKey='pccookie'
+                """
+                flag,s= wbPayClass.queryOrderForWeibo(ordercode=self.other_ordercode,start_time=start_time,end_time=end_time)
                 if not flag:
                     self.redisdataCall("查询失败!{}".format(s))
                     continue
@@ -48,6 +53,7 @@ class callback(object):
                             self.redisdataCall("交易关闭!{}".format(s))
                             continue
                         elif s[0]['status'] == '1':
+                            print("待完成状态")
                             self.redisdataCall()
                             continue
                         else:
@@ -58,7 +64,7 @@ class callback(object):
                 result = request('POST', url=urllib.parse.unquote(
                     '{}/callback_api/lastpass/jingdong_callback'.format(url_join())), data=request_data,json=request_data, verify=False)
                 if result.text != 'success':
-                    logger.info("请求对方服务器错误! {}".format(self.ordercode))
+                    print("请求对方服务器错误! {}".format(self.ordercode))
             except Exception as e:
                 self.redisdataCall(str(e))
                 continue
@@ -66,7 +72,7 @@ class callback(object):
     def redisdataCall(self,error=None):
         if error:
             logger.info(error)
-        self.redis_client.lpush(self.lKey, "{}|{}|{}|{}".format(self.ordercode, self.other_ordercode,self.session,self.endtime))
+        self.redis_client.lpush(self.lKey, "{}|allwin|{}|allwin|{}|allwin|{}".format(self.ordercode, self.other_ordercode,self.session,self.endtime))
         time.sleep(1)
 
 class callbackGetOrdercode(object):
@@ -82,28 +88,26 @@ class callbackGetOrdercode(object):
             if not redisRes:
                 continue
 
-            self.ordercode = redisRes.decode('utf-8').split("|")[0]
-            self.endtime = redisRes.decode('utf-8').split("|")[1]
+            self.ordercode = redisRes.decode('utf-8').split("|allwin|")[0]
+            self.session = redisRes.decode('utf-8').split("|allwin|")[1]
+            self.endtime = redisRes.decode('utf-8').split("|allwin|")[2]
 
             if UtilTime().timestamp >= int(self.endtime):
                 continue
             try:
                 orderObj = Order.objects.get(ordercode=self.ordercode)
 
-                s=WeiboHbPay(sessionRes=json.loads(orderObj.session))
-                s.payScWeiboUrl =json.loads(orderObj.jd_data)['payurl']
-                s.getPayParams()
-                s.orderForWeibo()
-                payordercode = s.orderForAliPay()
+                wbPayClass =WeiboPay(sessionRes=json.loads(self.session))
+                payordercode = wbPayClass.getPayId(json.loads(orderObj.jd_data)['payurl'])
 
                 orderObj.jd_payordercode = payordercode
                 orderObj.save()
 
                 weiboHandler = callback()
-                weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|{}|{}|{}".format(
+                weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|allwin|{}|allwin|{}|allwin|{}".format(
                     orderObj.ordercode,
                     orderObj.jd_payordercode,
-                    orderObj.session,
+                    self.session,
                     UtilTime().today.replace(minutes=120).timestamp))
 
             except Exception as e:
@@ -113,5 +117,52 @@ class callbackGetOrdercode(object):
     def redisdataCall(self,error=None):
         if error:
             logger.info(error)
-        self.redis_client.lpush(self.lKey, "{}|{}".format(self.ordercode,self.endtime))
+        self.redis_client.lpush(self.lKey, "{}|allwin|{}|allwin|{}".format(self.ordercode,self.session,self.endtime))
         time.sleep(1)
+
+
+class callbackGetHbList(object):
+    """
+    获取红包列表
+    """
+
+    def __init__(self):
+        # self.lKey = "WEIBOHONGBAO_SEND"
+        # self.redis_client = RedisHandler(key=self.lKey,db="default").redis_client
+        pass
+
+    def run(self):
+        print("获取红包列表开始!")
+        while True:
+            weiboSysRun().gethb()
+
+class callbackSendHb(object):
+    """
+    发送红包
+    """
+
+    def __init__(self):
+        # self.lKey = "WEIBOHONGBAO_SEND"
+        # self.redis_client = RedisHandler(key=self.lKey,db="default").redis_client
+        pass
+
+    def run(self):
+        print("发送红包开始!")
+        while True:
+            weiboSysRun().send()
+
+
+class callbackRobHb(object):
+    """
+    抢红包
+    """
+
+    def __init__(self):
+        # self.lKey = "WEIBOHONGBAO_SEND"
+        # self.redis_client = RedisHandler(key=self.lKey,db="default").redis_client
+        pass
+
+    def run(self):
+        print("抢红包开始!")
+        while True:
+            weiboSysRun().rob()

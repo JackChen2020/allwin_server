@@ -8,10 +8,11 @@ MIDDLEWARE_CLASSES_CUSTOM = [
     # 'debug_toolbar.middleware.DebugToolbarMiddleware'
 ]
 
-ServerUrl = os.environ.get('SERVERURL', 'localhost:8000')
+ServerUrl = os.environ.get('SERVERURL', 'http://localhost:8000')
 
 # 自定义APP
 INSTALLED_APPS_CUSTOM = [
+    'apps.weibohongbao',
     'apps.user',
     'apps.order',
     'apps.cache',

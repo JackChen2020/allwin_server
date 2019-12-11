@@ -1,3 +1,5 @@
+
+
 import os
 import sys
 import django
@@ -11,11 +13,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "education.settings")
 django.setup()
 
 """
-回调
+发送红包
 """
 
-from apps.weibohongbao.weiboCallback import callback
+from apps.weibohongbao.weiboCallback import callbackSendHb
 
 
 if __name__ == '__main__':
-    callback().run()
+    callbackSendHb().run()

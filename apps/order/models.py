@@ -52,14 +52,13 @@ class Order(models.Model):
 
     isjd = models.CharField(verbose_name="是否京东订单,0-是,1-否||是否红包",default='1',max_length=1)
 
-    jd_ordercode = models.CharField(verbose_name="京东订单号||红包支付订单号",max_length=120,default='')
+    jd_ordercode = models.CharField(verbose_name="京东订单号||红包订单号",max_length=120,default='')
+    jd_payordercode = models.CharField(verbose_name="红包支付订单号",max_length=120,default='')
     jd_data = models.CharField(verbose_name="京东json数据|红包数据(抢红包的信息)",max_length=1024,default="")
 
     # last_userid = models.IntegerField(verbose_name="码商ID",default=0)
-
     open_name = models.CharField(verbose_name="开户人", max_length=30, default='')
     bankno = models.CharField(verbose_name="银行卡",max_length=60,default='')
-
 
     def save(self, *args, **kwargs):
         t= time.mktime(timezone.now().timetuple())
