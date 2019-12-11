@@ -201,7 +201,7 @@ class weiboSysRun(object):
                 raise PubErrorCustom("群成员ID不正确{}".format(item))
 
         #群组长关联各个群成员
-        followClass = WeiboFollow(sessionRes=json.loads(userBossObj.session))
+        followClass = WeiboFollow(sessionRes=json.loads(userBossObj.session),cookieKey='.weibo.com')
         for item in userMemberObjs:
             followClass.follow(item.uid)
 
