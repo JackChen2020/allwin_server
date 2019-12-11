@@ -394,7 +394,9 @@ class WeiboFollow(WeiboBase):
             "nogroup":"1",
             "refer_from":"profile_headerv6"
         }
-        res = json.loads(self.session.post(url=url,data=data).content.decode("utf-8"))
+        r=self.session.post(url=url,data=data)
+        print(r)
+        res = json.loads(r.content.decode("utf-8"))
         if res['code'] != "100000":
             raise Exception(res['msg'])
 
