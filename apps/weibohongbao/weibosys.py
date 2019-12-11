@@ -261,6 +261,7 @@ class weiboSysRun(object):
         if self.wbOUser and self.wbOTask:
             pass
         else:
+            print("无可用用户或可用任务")
             return
 
         wbHbClass = WeiboHb(sessionRes=json.loads(self.wbOUser.session))
