@@ -420,7 +420,7 @@ class WeiboPay(WeiboBase):
         self.session.headers['Referer'] = "http://mall.e.weibo.com/h5/redenvelope/create?uicode=10000254&page=2&sinainternalbrowser=topnav&portrait_only=1&msgid={}&msgtype=2".format(msgid)
 
         url = "http://mall.e.weibo.com/aj/redenvelope/create"
-
+        self.use_proxy()
         data = {
             "bag_type": 1,
             "puicode": "",
