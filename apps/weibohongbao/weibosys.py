@@ -328,7 +328,7 @@ class weiboSysRun(object):
     def rob(self):
 
         time.sleep(4)
-        WbSLObj = WeiboSendList.objects.filter(status=1)
+        WbSLObj = WeiboSendList.objects.filter(status=1,taskid=self.wbOTask.taskid)
 
         if WbSLObj.exists():
             for item in WbSLObj:
