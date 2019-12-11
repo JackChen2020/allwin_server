@@ -409,7 +409,7 @@ class WeiboFollow(WeiboBase):
 class WeiboPay(WeiboBase):
 
     def __init__(self,**kwargs):
-        kwargs.setdefault("cookieKey", ".weibo.com")
+        kwargs.setdefault("cookieKey", ".weibo.cn")
         super(WeiboPay, self).__init__(**kwargs)
 
     def pay(self,price,amount,num,msgid=""):
@@ -517,7 +517,9 @@ class WeiboPay(WeiboBase):
             "biz_id":ordercode
         }
         print(data)
-        res = json.loads(self.session.post(url,data).content.decode('utf-8'))
+        r=self.session.post(url,data)
+        print(r.text)
+        res = json.loads(r.content.decode('utf-8'))
         if res['code']!='100000':
             return False,res['msg']
         else:
@@ -695,6 +697,7 @@ if __name__ == '__main__':
 
 
 
-    session={"gsid": "_2A25w9OXbDeRxGeBK6VYZ9S3JzzWIHXVRoH4TrDV6PUJbkdAKLXb9kWpNR848UC7pbGtsmjgU9BQBw9J3qJiz0JJP", "uid": "6424853549", "cookie": {".sina.com.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV_PUJbitANLULVkWtNR848UGnMqTu8zh-hgo46oWK4nWWy8Y9M", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".sina.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV9PUJbitANLVLkkWtNR848UA7zwYqtv4JcY1tqSi0Rgprph1Wq", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".weibo.com": {"SUB": "_2A25w9OXcDeRhGeBK6VYZ9S3JzzWIHXVQaZWUrDV8PUJbitANLXHhkWtNR848UDQ7xdqTJAn_utG3PPyDwtG--Lo7", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5Sj0mMeStwqW4KieXKK4OngA..", "SUHB": "0JvgCYGocab3Bg"}, ".weibo.cn": {"SUB": "_2A25w6KlVDeRhGeBK6VYZ9S3JzzWIHXVQZdEdrDV6PUJbitANLXTzkWtNR848UEJx1VV0V4R0cVX1_I7ObZ-aWWCb", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5SfweKMM72pFTVdcdwYu_jfw..", "SUHB": "0bt8qMSeKBDIFd"}, "pccookie": {"SCF": "Atiz8tz-fCTSp_baLkifdR6VUjwpG61T3fgzY_iosvL5ONoj9223yoot3zXOgJFdZaW4dY6fEn639eaya4GTUAE.", "SUB": "_2A25w9O2ODeRhGeBK6VYZ9S3JzzWIHXVTgFhGrDV8PUNbmtBeLRDVkW9NR848UJVC_YxuprHe-x1ncaTzTvdTlnvl", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0d4-cYGqrd1S89", "ALF": "1607586141", "SSOLoginState": "1576050142"}}, "s": "8e3487ea", "aid": "01A7-rs9h5H2UJarozhxkn1a9juBCBeCxvbr3L_O6brkT10uU."}
+    session={"gsid": "_2A25w9OXbDeRxGeBK6VYZ9S3JzzWIHXVRoH4TrDV6PUJbkdAKLXb9kWpNR848UC7pbGtsmjgU9BQBw9J3qJiz0JJP", "uid": "6424853549", "cookie": {".sina.com.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV_PUJbitANLULVkWtNR848UGnMqTu8zh-hgo46oWK4nWWy8Y9M", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".sina.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV9PUJbitANLVLkkWtNR848UA7zwYqtv4JcY1tqSi0Rgprph1Wq", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".weibo.com": {"SUB": "_2A25w9OXcDeRhGeBK6VYZ9S3JzzWIHXVQaZWUrDV8PUJbitANLXHhkWtNR848UDQ7xdqTJAn_utG3PPyDwtG--Lo7", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5Sj0mMeStwqW4KieXKK4OngA..", "SUHB": "0JvgCYGocab3Bg"}, ".weibo.cn": {"SUB": "_2A25w6KlVDeRhGeBK6VYZ9S3JzzWIHXVQZdEdrDV6PUJbitANLXTzkWtNR848UEJx1VV0V4R0cVX1_I7ObZ-aWWCb", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5SfweKMM72pFTVdcdwYu_jfw..", "SUHB": "0bt8qMSeKBDIFd"}, "pccookie": {"SCF": "AjxjJKgWqBDYaXMLfVADx6PeEJZhzqtzlQsKFS0Kwk5MyJuIZBdU2nQuS61h-Mi6uRyJFxo6HutzDNa1zlfoTIc.", "SUB": "_2A25w9Nn3DeRhGeBK6VYZ9S3JzzWIHXVTgEw_rDV8PUNbmtBeLWf-kW9NR848UCjk2UmwRRF-nIRFRwDbAyuWprfc", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0S7CL2kAFzcZ3u", "ALF": "1607589158", "SSOLoginState": "1576053159"}}, "s": "8e3487ea", "aid": "01A7-rs9h5H2UJarozhxkn1a9juBCBeCxvbr3L_O6brkT10uU."}
 
-    WeiboFollow(sessionRes=session).follow("5904854490")
+    s=WeiboPay(sessionRes=session)
+    s.queryOrderForWeibo(ordercode="124448344277969165",start_time="2019-12-08",end_time="2019-12-11")
