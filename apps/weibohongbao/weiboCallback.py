@@ -36,6 +36,7 @@ class callback(object):
                 ut = UtilTime()
                 end_time = ut.arrow_to_string(format_v="YYYY-MM-DD")
                 start_time = ut.arrow_to_string(ut.today.shift(days=-3),format_v="YYYY-MM-DD")
+                print(json.loads(self.session))
                 wbPayClass = WeiboPay(sessionRes=json.loads(self.session))
                 """
                 cookieKey='pccookie'

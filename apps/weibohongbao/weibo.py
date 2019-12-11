@@ -516,6 +516,7 @@ class WeiboPay(WeiboBase):
             "page_size":10,
             "biz_id":ordercode
         }
+        print(data)
         res = json.loads(self.session.post(url,data).content.decode('utf-8'))
         if res['code']!='100000':
             return False,res['msg']
