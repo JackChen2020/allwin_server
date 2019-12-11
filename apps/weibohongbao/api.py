@@ -146,7 +146,7 @@ class WeiBoAPIView(viewsets.ViewSet):
         wParams = WeiboParams.objects.get(id=1)
         name = wParams.nameid
 
-        wbUobj = WeiboUser.objects.filter(userid=userid,status='0',type='1',session_status='0')
+        wbUobj = WeiboUser.objects.filter(userid=userid,status='0',type='1')
 
         if not wbUobj.exists():
             raise PubErrorCustom("无合法的抢红包账号!")
