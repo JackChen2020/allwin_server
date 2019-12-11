@@ -254,29 +254,11 @@ class WeiboGroup(WeiboBase):
         kwargs.setdefault("cookieKey", ".weibo.com")
         super(WeiboGroup,self).__init__(**kwargs)
 
-        self.session.headers['Content-type']="application/x-www-form-urlencoded; charset=utf-8"
-        self.session.headers['User-agent'] = "Weibo/39290 (iPhone; iOS 12.4.1; Scale/2.00)"
-        self.params = {
-            "gsid": self.sessionRes['gsid'],
-            "sensors_mark": "0",
-            "wm": "3333_2001",
-            "sensors_is_first_day": "false",
-            "from": "109B293010",
-            "sensors_device_id": "7F2E6523-1726-4FB9-87E5-038B80BC8AC7",
-            "c": "iphone",
-            "v_p": "78",
-            "skin": "default",
-            "s": self.sessionRes['s'],
-            "aid": self.sessionRes['aid'],
-            "v_f": "1",
-            "networktype": "wifi",
-            "b": "0",
-            "lang": "zh_CN",
-            "ua": "iPhone11,8__weibo__9.11.2__iphone__os12.4.1",
-            "sflag": "1",
-            "ft": "0",
-            "launchid": "icon"
-        }
+        self.params="?gsid={}&sensors_mark=0&wm=3333_2001&sensors_is_first_day=false&from=109B493010&sensors_device_id=7F2E6523-1726-4FB9-87E5-038B80BC8AC7&c=iphone&v_p=78&skin=default&s={}&v_f=1&networktype=wifi&b=0&lang=zh_CN&ua=iPhone11,8__weibo__9.11.4__iphone__os12.4.1&sflag=1&ft=0&aid={}&launchid=10000365--x".format(
+            self.sessionRes['gsid'],
+            self.sessionRes['s'],
+            self.sessionRes['aid']
+        )
 
     def create(self,name):
         """
@@ -286,8 +268,12 @@ class WeiboGroup(WeiboBase):
         :return:
         """
 
+        # self.reset_session(None,None)
+        # self.session.headers['Content-type']="application/x-www-form-urlencoded; charset=utf-8"
+        # self.session.headers['User-agent'] = "Weibo/39290 (iPhone; iOS 12.4.1; Scale/2.00)"
+
         #创建群前先调用检查接口
-        url = """https://api.weibo.cn/2/groupchat/check_valid"""
+        url = """https://api.weibo.cn/2/groupchat/check_valid"""+self.params
 
         data={
             "orifid": "0$$0",
@@ -299,14 +285,16 @@ class WeiboGroup(WeiboBase):
             "type":"1",
             "oriuicode":"10000414_10000251"
         }
-
-        rRes=self.session.post(url=url,data=data,params=self.params)
+        print(self.params)
+        print(data)
+        rRes=self.session.post(url=url,data=data)
         res = json.loads(rRes.content.decode('utf-8'))
+        print(res)
         if "errmsg" in res and res['errmsg']:
             raise Exception(res['errmsg'])
 
         # 创建群
-        url="""https://api.weibo.cn/2/groupchat/create"""
+        url="""https://api.weibo.cn/2/groupchat/create"""+self.params
 
         data={
             "page_type": "1",
@@ -321,7 +309,7 @@ class WeiboGroup(WeiboBase):
             "name":name,
             "oriuicode":"10000414_10000251"
         }
-        res = json.loads(self.session.post(url=url,data=data,params=self.params).content.decode('utf-8'))
+        res = json.loads(self.session.post(url=url,data=data).content.decode('utf-8'))
         if "errmsg" in res and res['errmsg']:
             raise Exception(res['errmsg'])
         else:
@@ -698,7 +686,7 @@ if __name__ == '__main__':
 
 
 
-    session={"gsid": "_2A25w9OXbDeRxGeBK6VYZ9S3JzzWIHXVRoH4TrDV6PUJbkdAKLXb9kWpNR848UC7pbGtsmjgU9BQBw9J3qJiz0JJP", "uid": "6424853549", "cookie": {".sina.com.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV_PUJbitANLULVkWtNR848UGnMqTu8zh-hgo46oWK4nWWy8Y9M", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".sina.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV9PUJbitANLVLkkWtNR848UA7zwYqtv4JcY1tqSi0Rgprph1Wq", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".weibo.com": {"SUB": "_2A25w9OXcDeRhGeBK6VYZ9S3JzzWIHXVQaZWUrDV8PUJbitANLXHhkWtNR848UDQ7xdqTJAn_utG3PPyDwtG--Lo7", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5Sj0mMeStwqW4KieXKK4OngA..", "SUHB": "0JvgCYGocab3Bg"}, ".weibo.cn": {"SUB": "_2A25w6KlVDeRhGeBK6VYZ9S3JzzWIHXVQZdEdrDV6PUJbitANLXTzkWtNR848UEJx1VV0V4R0cVX1_I7ObZ-aWWCb", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5SfweKMM72pFTVdcdwYu_jfw..", "SUHB": "0bt8qMSeKBDIFd"}, "pccookie": {"SCF": "AjxjJKgWqBDYaXMLfVADx6PeEJZhzqtzlQsKFS0Kwk5MyJuIZBdU2nQuS61h-Mi6uRyJFxo6HutzDNa1zlfoTIc.", "SUB": "_2A25w9Nn3DeRhGeBK6VYZ9S3JzzWIHXVTgEw_rDV8PUNbmtBeLWf-kW9NR848UCjk2UmwRRF-nIRFRwDbAyuWprfc", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0S7CL2kAFzcZ3u", "ALF": "1607589158", "SSOLoginState": "1576053159"}}, "s": "8e3487ea", "aid": "01A7-rs9h5H2UJarozhxkn1a9juBCBeCxvbr3L_O6brkT10uU."}
+    session={"gsid": "_2A25w9MNaDeRxGeFN7lMZ-SfKyzWIHXVRoFGSrDV6PUJbkdANLXCikWpNQAQcu2B0oTsTZP8MI3kNDYr4SUZcWXcG", "uid": "7351899609", "cookie": {".sina.com.cn": {"SUB": "_2A25w9OfBDeRhGeFN7lMZ-SfKyzWIHXVQaZOJrDV_PUJbitANLXHVkWtNQAQcu14c_yasim5BUMLWL1JU2FTy1OdT", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWFFJ5QfnFU--Qse1f4QD_45NHD95QNe0-p1h.4So54Ws4DqcjJi--fi-isi-8Fi--Xi-z4iK.7i--Xi-zRiKn7i--Ni-88i-zpeh2t"}, ".sina.cn": {"SUB": "_2A25w9OfBDeRhGeFN7lMZ-SfKyzWIHXVQaZOJrDV9PUJbitANLVr4kWtNQAQcu0XN8NC2LvsLT1ZFljCtPvXuFIqq", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWFFJ5QfnFU--Qse1f4QD_45NHD95QNe0-p1h.4So54Ws4DqcjJi--fi-isi-8Fi--Xi-z4iK.7i--Xi-zRiKn7i--Ni-88i-zpeh2t"}, ".weibo.com": {"SUB": "_2A25w9OfBDeRhGeFN7lMZ-SfKyzWIHXVQaZOJrDV8PUJbitANLWzZkWtNQAQcu3Gbr_dxwGTzXgzvcd3ywBpL2A_U", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWFFJ5QfnFU--Qse1f4QD_45NHD95QNe0-p1h.4So54Ws4DqcjJi--fi-isi-8Fi--Xi-z4iK.7i--Xi-zRiKn7i--Ni-88i-zpeh2t", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHlQtrfZErk1nGXWd9lQzIdvHAU6ABK9bwq6DQZXozV3LA..", "SUHB": "0xnCCbShVtNsAQ"}, ".weibo.cn": {"SUB": "_2A25w9OfBDeRhGeFN7lMZ-SfKyzWIHXVQaZOJrDV6PUJbitANLVb4kWtNQAQcu2Ev3l_Rcrit-8T52gw3LH0VOE7B", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWFFJ5QfnFU--Qse1f4QD_45NHD95QNe0-p1h.4So54Ws4DqcjJi--fi-isi-8Fi--Xi-z4iK.7i--Xi-zRiKn7i--Ni-88i-zpeh2t", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHlQtrfZErk1nGXWd9lQzIdvfyw2nWXUCRB368fjlOXacQ..", "SUHB": "0qj0zWym28v8Qg"}, "pccookie": {"SCF": "AuiYezcPwKdZmaKw_RVrBO1G71X2Lq-ormw-FAjA_CneFpmTFepVEpG1JInZHBiawjdOwU4GZF006ziMcyiz5TY.", "SUB": "_2A25w9MTXDeRhGeFN7lMZ-SfKyzWIHXVTg7EfrDV8PUNbmtBeLRn9kW9NQAQcuwegf38sJD6FAkB9clNHIq5p3GuG", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWFFJ5QfnFU--Qse1f4QD_45JpX5K2hUgL.FoM0SK2R1K.ceh.2dJLoIEqLxK-LB.qLB-zLxKBLBo.L1K5LxKBLBonL1h5LxKMLB--LBo27eBtt", "SUHB": "0vJIrTxZ7L4vkd", "ALF": "1607591942", "SSOLoginState": "1576055943"}}, "s": "06586e7d", "aid": "01A7-rs9h5H2UJarozhxkn1a8KGuR4gxRZsRYl94cHDdyCUxQ."}
 
-    s=WeiboPay(sessionRes=session)
-    s.queryOrderForWeibo(ordercode="124448344277969165",start_time="2019-12-08",end_time="2019-12-11")
+    s=WeiboGroup(sessionRes=session)
+    s.create("test4")
