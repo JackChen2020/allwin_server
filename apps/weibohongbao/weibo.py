@@ -483,10 +483,14 @@ class WeiboPay(WeiboBase):
                 raise Exception("系统异常,请联系管理员!")
             # 成功 code=="100000"
             print(res)
-            return res['data']['pay_id']
+            return res['data']['wap_pay_url'],res['data']['pay_id']
         except Exception as e:
             print("orderForAliPay ! ： {}".format(str(e)))
             raise Exception("系统异常,请联系管理员!")
+
+    def createorder(self,url):
+        html = self.session.get(url=url).text
+        return html
 
     def queryOrderForWeibo(self,ordercode,start_time,end_time):
 

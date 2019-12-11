@@ -146,46 +146,12 @@ class CreateOrder(object):
             if self.paypasslinktype.passid in (0, 1):
 
                 wbSClass = weiboSysRun()
+                html = wbSClass.pay(self.order)
 
-                # payobj = WeiboPayUsername.objects.filter(status='0',type='0')
-                # if not payobj.exists():
-                #     raise PubErrorCustom("未设置数据!")
-                # c = payobj.count()
-                # # print(c)
-                # index = random.randint(0, c - 1)
-                # obj = payobj[index]
-                #
-                # num = math.ceil(float(self.order.amount) / 200)
-                # url, ordercode = WeiboHbPay(
-                #     sessionRes=json.loads(obj.session),
-                #     amount=int(float(self.order.amount)),
-                #     num=num).run()
-                # # self.order.pass_username = obj.username
-                # self.order.isjd = '0'
-                # self.order.jd_ordercode = ordercode
-                # self.order.jd_data=json.dumps({
-                #     "payurl" : url,
-                #     "userid" : obj.userid,
-                #     "status" : "0",     #0-待支付,1-已支付,未发红包,2-已发红包,3-红包被抢
-                #     "num" : num,        #红包个数
-                #     "ok_num" : 0,       #已抢个数
-                #     "run_username":[],  #抢红包的人的集合
-                # })
-                # self.order.save()
-                #
-                # # weiboHandler = callback()
-                # # weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|{}|{}|{}".format(
-                # #     self.order.ordercode,
-                # #     self.order.jd_ordercode,
-                # #     obj.session,
-                # #     UtilTime().today.replace(minutes=120).timestamp))
-                #
-                # weiboHandler = callbackGetOrdercode()
-                # weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|{}".format(
-                #     self.order.ordercode,
-                #     UtilTime().today.replace(minutes=120).timestamp))
+                RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
 
-                return {"path": wbSClass.pay(self.order)}
+                return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
+
 
             #聚力支付
             elif str(self.paypasslinktype.passid) == '4':

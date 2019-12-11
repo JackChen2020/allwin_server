@@ -60,9 +60,12 @@ class weiboSysRun(object):
         wbPayClass = WeiboPay(sessionRes=json.loads(self.wbOUser.session))
 
         url,ordercode, = wbPayClass.pay(price=price,num=self.robnumber,amount=amount)
+        wapurl,payordercode = wbPayClass.getPayId(url)
+        html = wbPayClass.createorder(wapurl)
 
         order.isjd = '0'
         order.jd_ordercode = ordercode
+        order.jd_payordercode = payordercode
         order.jd_data = json.dumps({
             "payurl": url,
             "userid": self.wbOUser.userid, #码商ID
@@ -72,20 +75,21 @@ class weiboSysRun(object):
             "run_username": [],  # 抢红包的人的集合
         })
         order.save()
-        self.payafter(order.ordercode)
-        return url
+        self.payafter(order,self.wbOUser.session)
+        return html
 
-    def payafter(self,ordercode):
-        from apps.weibohongbao.weiboCallback import callbackGetOrdercode
+    def payafter(self,order,session):
+        from apps.weibohongbao.weiboCallback import callback
         """
-        微博订单与支付订单同步
+        微博订单回调通知
         :param ordercode:系统订单号
         :return:
         """
-        weiboHandler = callbackGetOrdercode()
-        weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|allwin|{}|allwin|{}".format(
-            ordercode,
-            self.wbOUser.session,
+        weiboHandler = callback()
+        weiboHandler.redis_client.lpush(weiboHandler.lKey, "{}|allwin|{}|allwin|{}|allwin|{}".format(
+            order.ordercode,
+            order.jd_payordercode,
+            session,
             UtilTime().today.replace(minutes=120).timestamp))
 
     def getvercode(self,username):
