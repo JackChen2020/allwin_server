@@ -328,6 +328,12 @@ class weiboSysRun(object):
     def rob(self):
 
         time.sleep(4)
+
+        if self.wbOUser and self.wbOTask:
+            pass
+        else:
+            return
+
         WbSLObj = WeiboSendList.objects.filter(status=1,taskid=self.wbOTask.taskid)
 
         if WbSLObj.exists():
