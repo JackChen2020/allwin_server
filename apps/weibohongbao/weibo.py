@@ -417,7 +417,7 @@ class WeiboPay(WeiboBase):
         self.session.headers['Content-Type'] = "application/x-www-form-urlencoded"
         self.session.headers['Origin'] = "http://mall.e.weibo.com"
         self.session.headers['User-Agent'] = 'Mozilla/5.0 (iPhone; CPU iPhone OS 12_4_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Weibo (iPhone11,8__weibo__9.11.2__iphone__os12.4.1)'
-        self.session.headers['Referer'] = "http://mall.e.weibo.cn/h5/redenvelope/create?uicode=10000254&page=2&sinainternalbrowser=topnav&portrait_only=1&msgid={}&msgtype=2".format(msgid)
+        self.session.headers['Referer'] = "http://mall.e.weibo.com/h5/redenvelope/create?uicode=10000254&page=2&sinainternalbrowser=topnav&portrait_only=1&msgid={}&msgtype=2".format(msgid)
 
         url = "http://mall.e.weibo.com/aj/redenvelope/create"
         # self.use_proxy()
