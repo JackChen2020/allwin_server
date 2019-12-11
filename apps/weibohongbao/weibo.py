@@ -379,7 +379,7 @@ class WeiboFollow(WeiboBase):
         :return:
         """
         pass
-        self.session.headers['Referer'] = 'https://www.weibo.com/u/{}?is_hot=1'.format(to)
+        self.session.headers['Referer'] = 'https://www.weibo.com/u/{}?is_hot=1&noscale_head=1'.format(to)
         url="https://www.weibo.com/aj/f/followed?ajwvr=6"
 
         data={
@@ -392,7 +392,12 @@ class WeiboFollow(WeiboBase):
             "oid":to,
             "wforce":"1",
             "nogroup":"1",
-            "refer_from":"profile_headerv6"
+            "refer_from":"profile_headerv6",
+            "template":7,
+            "special_focus":1,
+            "isrecommend":1,
+            "is_special":0,
+            "_t":0
         }
         r=self.session.post(url=url,data=data)
         print(r.text)
@@ -688,6 +693,6 @@ if __name__ == '__main__':
 
 
 
-    session={"uid": "5904854490", "cookie": {"pccookie": {"SCF": "Alp0iYA-0DhpLM1VwnnO76ORgwpKN34I264GB0t7MzV4NuvPav3bCfWjN8eUuOVqM3MMwh9f1goi5uUEvjvNnoI.", "SUB": "_2A25w9B0EDeRhGeNH61YZ9SrIwjyIHXVTgAnMrDV8PUNbmtBeLVbFkW9NSvs4pXoKubPOtaWFH__ez10ONwrcNi00", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WWj1yl.QKel5o_7Wo65RIgZ5JpX5K2hUgL.Fo-4ehBRSKBX1K52dJLoIEBLxK-L12qLBoeLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBoqt", "SUHB": "0G0e1UIdvyozNQ", "ALF": "1607573714", "SSOLoginState": "1576037716"}}}
+    session={"gsid": "_2A25w9OXbDeRxGeBK6VYZ9S3JzzWIHXVRoH4TrDV6PUJbkdAKLXb9kWpNR848UC7pbGtsmjgU9BQBw9J3qJiz0JJP", "uid": "6424853549", "cookie": {".sina.com.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV_PUJbitANLULVkWtNR848UGnMqTu8zh-hgo46oWK4nWWy8Y9M", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".sina.cn": {"SUB": "_2A25w6KlUDeRhGeBK6VYZ9S3JzzWIHXVQZdEcrDV9PUJbitANLVLkkWtNR848UA7zwYqtv4JcY1tqSi0Rgprph1Wq", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt"}, ".weibo.com": {"SUB": "_2A25w9OXcDeRhGeBK6VYZ9S3JzzWIHXVQaZWUrDV8PUJbitANLXHhkWtNR848UDQ7xdqTJAn_utG3PPyDwtG--Lo7", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5Sj0mMeStwqW4KieXKK4OngA..", "SUHB": "0JvgCYGocab3Bg"}, ".weibo.cn": {"SUB": "_2A25w6KlVDeRhGeBK6VYZ9S3JzzWIHXVQZdEdrDV6PUJbitANLXTzkWtNR848UEJx1VV0V4R0cVX1_I7ObZ-aWWCb", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5NHD95QcShzX1h-0SKB4Ws4DqcjMi--NiK.Xi-2Ri--ciKnRi-zNSoBEShnfe0-X1Btt", "SCF": "AjOaGw1K_o2AsNr4Ql_tYHmMXf5f26zLjl8q75SAoe5SfweKMM72pFTVdcdwYu_jfw..", "SUHB": "0bt8qMSeKBDIFd"}, "pccookie": {"SCF": "Atiz8tz-fCTSp_baLkifdR6VUjwpG61T3fgzY_iosvL5ONoj9223yoot3zXOgJFdZaW4dY6fEn639eaya4GTUAE.", "SUB": "_2A25w9O2ODeRhGeBK6VYZ9S3JzzWIHXVTgFhGrDV8PUNbmtBeLRDVkW9NR848UJVC_YxuprHe-x1ncaTzTvdTlnvl", "SUBP": "0033WrSXqPxfM725Ws9jqgMF55529P9D9WhynzPaK8eg5ghc_zslWHoV5JpX5K2hUgL.FoqXeoBRSKefSh.2dJLoIEQLxK-LBoMLBKqLxKqL1h.L12zLxKqL1--LB-zLxK-L12qLBo9k1K-NSKet", "SUHB": "0d4-cYGqrd1S89", "ALF": "1607586141", "SSOLoginState": "1576050142"}}, "s": "8e3487ea", "aid": "01A7-rs9h5H2UJarozhxkn1a9juBCBeCxvbr3L_O6brkT10uU."}
 
-    WeiboHbGet(sessionRes=session).rob(url="https://mall.e.weibo.com/redenvelope/draw?set_id=6000060150625")
+    WeiboFollow(sessionRes=session).follow("5904854490")
