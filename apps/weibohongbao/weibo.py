@@ -681,7 +681,7 @@ class WeiboHbGet(WeiboBase):
         super(WeiboHbGet, self).__init__(**kwargs)
 
     def rob(self,url):
-        self.use_proxy()
+        # self.use_proxy()
         html = self.session.get(url=url).text
         res = re.compile(r'<a.*=zhadan_hongbao_gxth">?.*?</a>').findall(html)
         print(html)
