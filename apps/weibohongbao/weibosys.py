@@ -334,7 +334,10 @@ class weiboSysRun(object):
             for item in WbSLObj:
                 uidsObj=json.loads(item.uids)
                 print(uidsObj)
+                print(item.groupid)
                 for item_member in WeiboGroupMember.objects.filter(group_id=item.groupid):
+
+
                     if len(item.uids) and item_member.son_uid in uidsObj['uids']:
                         continue
 
