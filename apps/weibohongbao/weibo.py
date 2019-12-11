@@ -441,7 +441,7 @@ class WeiboPay(WeiboBase):
         return res['data']['url'], res['data']['url'].split("out_pay_id=")[1].split('&')[0]
 
     def getPayId(self,url):
-
+        print(url)
         params = unquote(self.session.head(url=url,stream=True).headers['Location'].replace("sinaweibo://wbpay?", "").split("pay_params=")[1],'utf-8')
         print(params)
 
