@@ -17,5 +17,6 @@ RUN pip install --upgrade pip \
     && mkdir -p /var/logs/sso \
     && echo "" > /var/logs/uwsgi/run.log \
     && echo "" > /var/logs/sso/cron.log
+    && python manage.py  crontab add
 
 CMD crond && uwsgi /project/sso/education/wsgi/uwsgi.ini
