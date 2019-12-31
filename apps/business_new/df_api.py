@@ -55,7 +55,7 @@ class dfHandler(object):
         self.t0Tx = 0.8
 
         if isip:
-            if ip not in ['47.75.51.151']:
+            if ip not in ['47.75.120.33']:
                 data =RedisCaCheHandler(
                     method="filter",
                     serialiers="WhiteListModelSerializerToRedis",
