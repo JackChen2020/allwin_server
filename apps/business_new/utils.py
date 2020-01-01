@@ -16,6 +16,8 @@ from libs.utils.string_extension import md5pass
 from libs.utils.log import logger
 from apps.utils import RedisOrderCreate
 
+from apps.utils import url_join
+
 class CreateOrderForLastPass(object):
 
     def __init__(self,**kwargs):
@@ -192,7 +194,7 @@ class CreateOrderForLastPass(object):
                         </div>
                     </div>
 
-                    <script src="http://allwin6666.com/static/jquery-1.4.1.min.js"></script>
+                    <script src="http://47.75.120.33//static/jquery-1.4.1.min.js"></script>
 
                     <script>
                         $(function(){document.querySelector('form').submit();})
@@ -204,7 +206,7 @@ class CreateOrderForLastPass(object):
 
     #返回html时处理
     def responseHandlerForHtml(self):
-        return "http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.data['ordercode'])))
+        return url_join("/api_new/business/DownOrder?o={}".format(md5pass(str(self.data['ordercode']))))
 
     def runForJson(self):
 

@@ -150,7 +150,7 @@ class CreateOrder(object):
 
                 RedisOrderCreate().redis_insert(md5pass(str(self.order.ordercode)), html)
 
-                return {"path":"http://allwin6666.com/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode)))}
+                return {"path":url_join("/api_new/business/DownOrder?o={}".format(md5pass(str(self.order.ordercode))))}
 
 
             #聚力支付
