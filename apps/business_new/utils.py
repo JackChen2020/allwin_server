@@ -94,11 +94,19 @@ class CreateOrderForLastPass(object):
 
     #签名
     def signHandler(self):
-        sign = SignBase(
-            hashData=self.request_data,
-            signData=self.request_data_sign,
-            signRules=self.rules['sign']
-        ).run()
+
+        if self.passid == 79:
+            sign = SignBase(
+                hashData=self.request_data,
+                signData=self.request_data_sign,
+                signRules=self.rules['sign']
+            ).md5()
+        else:
+            sign = SignBase(
+                hashData=self.request_data,
+                signData=self.request_data_sign,
+                signRules=self.rules['sign']
+            ).run()
 
         self.request_data[self.rules['sign']['signKey']] = sign
 
@@ -367,6 +375,31 @@ class SignBase(object):
 
     def run(self):
         return getattr(self,self.signRules['signType'])()
+
+
+class SignBaseCustom(object):
+
+    def __init__(self,**kwargs):
+
+        #请求的值
+        self.hashData = kwargs.get("hashData",None)
+
+        #加密的值
+        self.signData = kwargs.get("signData",None)
+
+        #加密规则
+        self.signRules = kwargs.get("signRules",None)
+
+
+    def md5(self):
+        s = "?amount={amount}&attach={attach}&outOrderNo={outOrderNo}&payType={payType}{appId}{nonceStr}{timestamp}".format(**self.hashData)
+        print(s)
+        s = hashlib.md5(s.encode(self.signRules['signEncode'])).hexdigest()
+        s+=self.hashData['secret']
+        print(s)
+        s = hashlib.md5(s.encode(self.signRules['signEncode'])).hexdigest().upper()
+        return s
+
 
 
 if __name__ == '__main__':
